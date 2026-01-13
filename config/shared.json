@@ -1,0 +1,47 @@
+{
+  "_comment": "Shared configuration for all SimGolf bays. Bay-specific overrides are in bays.json",
+
+  "repoPath": "C:\\SimGolf\\sig-facility",
+  "logPath": "C:\\SimGolf\\logs",
+  "dataPath": "C:\\SimGolf\\data",
+  "scriptsPath": "C:\\SimGolf\\sig-facility\\scripts",
+
+  "gsproPath": "C:\\GSProV1",
+  "gsproLauncherPath": "C:\\GSProV1\\GSPLauncher.exe",
+  "gsproConnectPath": "C:\\GSProV1\\Core\\GSPC\\GSPconnect.exe",
+  "gsproCoursesPath": "C:\\GSProV1\\Core\\GSP\\Courses",
+  "gsproSettingsPath": "C:\\Users\\%USERNAME%\\AppData\\LocalLow\\GSPro\\GSPro",
+
+  "courseSyncEnabled": true,
+  "courseSyncSource": "\\\\SIGBAY1\\sig\\gspro-prefetcher\\sgt",
+  "courseSyncDestination": "C:\\Courses",
+  "courseSyncStagingPath": "C:\\course_staging",
+  "courseSyncLogPath": "C:\\Logs\\CourseSync",
+  "courseSyncThreads": 8,
+  "courseSyncRetries": 5,
+  "courseSyncWaitSeconds": 10,
+
+  "statusMonitorEnabled": true,
+  "statusMonitorUrl": "https://app.swedenindoorgolf.se/sig-status/status",
+  "statusMonitorIntervalSeconds": 60,
+
+  "popupImageUrl": "https://simple-sgt.fly.dev/matchi/courts/5/show-image",
+  "popupImagePath": "C:\\start\\popup\\dialog-image.jpg",
+
+  "syncIntervalSeconds": 60,
+  "healthCheckIntervalSeconds": 300,
+
+  "bookingSystemApiUrl": "https://api.your-booking-system.com/v1",
+  "facilityId": "SIMGOLF-MAIN",
+
+  "enableAutoUpdates": true,
+  "enableTelemetry": true,
+  "enableDebugLogging": false,
+
+  "networkDrive": "Z:",
+  "networkDrivePath": "Z:\\sgt",
+  "sharedDataPath": "Z:\\SimGolf\\Shared",
+
+  "maxLogFileSizeMB": 50,
+  "maxLogFileAgeDays": 30
+}
