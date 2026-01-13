@@ -147,10 +147,22 @@ function Install-SimGolfSystem {
     # Step 3: Copy supervisor script
     Write-Info "Step 3: Installing supervisor script..."
 
+    # If supervisor.ps1 doesn't exist locally, download it from GitHub
     if (-not (Test-Path $SupervisorSourcePath)) {
-        Write-Fail "Supervisor source script not found at $SupervisorSourcePath"
-        Write-Fail "Make sure you're running this from the install directory."
-        return $false
+        Write-Info "Supervisor not found locally, downloading from GitHub..."
+
+        $supervisorUrl = "https://raw.githubusercontent.com/marcusta/sig-facility/main/install/supervisor.ps1"
+        $tempSupervisorPath = "$env:TEMP\supervisor.ps1"
+
+        try {
+            Invoke-WebRequest -Uri $supervisorUrl -OutFile $tempSupervisorPath -UseBasicParsing
+            $SupervisorSourcePath = $tempSupervisorPath
+            Write-Success "Downloaded supervisor.ps1 from GitHub"
+        } catch {
+            Write-Fail "Failed to download supervisor.ps1: $_"
+            Write-Fail "You can manually download it from: $supervisorUrl"
+            return $false
+        }
     }
 
     try {
