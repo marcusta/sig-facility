@@ -170,6 +170,3 @@ function Test-SimGolfConfig {
 
     Write-Host ""
 }
-
-# Export functions
-Export-ModuleMember -Function Get-SimGolfConfig, Test-SimGolfConfig
