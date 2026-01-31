@@ -14,7 +14,8 @@
   "BAY03": {
     "logicalBay": 3,
     "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
-    "courseSyncStagingPath": "C:\\course_staging"
+    "courseSyncStagingPath": "C:\\course_staging",
+    "hasRelay": false
   },
 
   "BAY04": {

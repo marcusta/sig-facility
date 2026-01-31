@@ -102,6 +102,7 @@ global blinkStep := 0       ; Step counter for complex patterns
 ; USB RELAY
 ; ##################################################################
 
+global relayEnabled := !FileExist("C:\SimGolf\no-relay")
 global relayPort := 0
 global relayPortName := ""
 
@@ -209,7 +210,10 @@ UpdateDebugOverlayState() {
 ; ##################################################################
 
 LogStatus("Starting System v2 (Timer-based)...")
-InitializeRelay()
+if (relayEnabled)
+    InitializeRelay()
+else
+    LogStatus("Relay disabled (no-relay flag)")
 InitializeSystem()
 StartTimers()
 
@@ -943,9 +947,11 @@ CleanupAndExit() {
     SetTimer(BlinkEngineTick, 0)
     SetTimer(RecoveryTick, 0)
 
-    SetRelayRed()
-    Sleep(100)
-    CloseSerialPort(relayPort)
+    if (relayEnabled) {
+        SetRelayRed()
+        Sleep(100)
+        CloseSerialPort(relayPort)
+    }
 
     if WinExist(REPLICA_WINDOW)
         WinClose(REPLICA_WINDOW)
@@ -1105,7 +1111,9 @@ SendRelayCommand(handle, cmd) {
 global lastRelayState := -1
 
 SetRelayGreen() {
-    global relayPort, lastRelayState
+    global relayPort, lastRelayState, relayEnabled
+    if (!relayEnabled)
+        return true
     if (lastRelayState = 0)
         return true
     LogStatus("Relay -> GREEN (port:" . relayPort . ")", false)
@@ -1118,7 +1126,9 @@ SetRelayGreen() {
 }
 
 SetRelayRed() {
-    global relayPort, lastRelayState
+    global relayPort, lastRelayState, relayEnabled
+    if (!relayEnabled)
+        return true
     if (lastRelayState = 1)
         return true
     LogStatus("Relay -> RED (port:" . relayPort . ")", false)
