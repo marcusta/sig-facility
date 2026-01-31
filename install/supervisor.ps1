@@ -88,6 +88,13 @@ function Update-Repository {
     try {
         Push-Location $Path
 
+        # Ensure we're on main branch (could be on a dev branch after unclean shutdown)
+        $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
+        if ($currentBranch -ne "main") {
+            Write-Log "Not on main branch (on '$currentBranch'), switching to main" -Level "WARN"
+            git checkout main 2>&1 | Out-String | Write-Log
+        }
+
         # Fetch and pull with fast-forward only (safer)
         Write-Log "Pulling updates..." -Level "INFO"
         $pullOutput = git pull --ff-only origin main 2>&1 | Out-String
