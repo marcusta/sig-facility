@@ -81,7 +81,7 @@ function Get-SimGolfConfig {
             Write-Warning "Failed to read bay identity from $identityPath : $_"
         }
     } else {
-        Write-Warning "Bay identity file not found at $identityPath — using shared config only"
+        Write-Warning "Bay identity file not found at $identityPath - using shared config only"
     }
 
     # Load bay-specific config
@@ -109,7 +109,7 @@ function Get-SimGolfConfig {
                     }
                 }
             } else {
-                Write-Warning "Bay ID '$bayId' not found in bays.json — using shared config only"
+                Write-Warning "Bay ID '$bayId' not found in bays.json - using shared config only"
             }
         } catch {
             Write-Warning "Failed to load bays config from $baysConfigPath : $_"
