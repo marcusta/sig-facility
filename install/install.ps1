@@ -203,6 +203,7 @@ function Install-SimGolfSystem {
     $startupLnk.TargetPath = "$RepoPath\scripts\startup-launcher.bat"
     $startupLnk.WorkingDirectory = "$RepoPath\scripts"
     $startupLnk.Description = "SimGolf Startup Launcher"
+    $startupLnk.WindowStyle = 7  # 7 = Minimized
     $startupLnk.Save()
     Write-Success "Created startup shortcut: $startupFolder\SimGolf.lnk"
     Write-Host ""

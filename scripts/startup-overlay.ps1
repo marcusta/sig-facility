@@ -8,9 +8,10 @@ $form.StartPosition = 'CenterScreen'
 $form.TopMost = $true
 $form.Size = New-Object System.Drawing.Size(600, 200)
 $form.ShowInTaskbar = $false
+$form.Text = "SimGolf-StartupOverlay"
 
 $label = New-Object System.Windows.Forms.Label
-$label.Text = "Vänligen vänta, systemet startar..."
+$label.Text = "V`u{00E4}nligen v`u{00E4}nta, systemet startar..."
 $label.ForeColor = [System.Drawing.Color]::White
 $label.Font = New-Object System.Drawing.Font("Segoe UI", 24)
 $label.AutoSize = $false

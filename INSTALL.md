@@ -18,19 +18,11 @@ Add an entry like:
 
 ```json
 "BAY09": {
-  "logicalBay": 9,
-  "description": "Bay 9 - description",
-  "networkDrive": "Z:",
-  "hasHighSpeedCamera": true,
-  "displayResolution": "3840x2160"
+  "logicalBay": 9
 }
 ```
 
-Key fields:
-- **logicalBay** — the physical bay number (may differ from bay ID if hardware was swapped)
-- **networkDrive** — drive letter for the network share
-- **displayResolution** — monitor resolution
-- **hasHighSpeedCamera** — whether the bay has a high-speed camera
+Add `courseSyncDestination` and `courseSyncStagingPath` if they differ from the shared defaults (`C:\Courses` and `C:\course_staging`).
 
 Bay-specific values override the defaults in `config/shared.json`. See existing entries in `bays.json` for examples.
 
@@ -40,11 +32,17 @@ Bay-specific values override the defaults in `config/shared.json`. See existing 
 
 ### 1. Run the installer
 
+Open PowerShell on the bay machine and run:
+
 ```powershell
-powershell -ExecutionPolicy Bypass -File "\\path\to\install.ps1"
+powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/marcusta/sig-facility/main/install/install.ps1' -OutFile '$env:TEMP\install.ps1'; & '$env:TEMP\install.ps1'"
 ```
 
-Or copy `install/install.ps1` to the machine and run it locally.
+Or pass the bay ID directly:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/marcusta/sig-facility/main/install/install.ps1' -OutFile '$env:TEMP\install.ps1'; & '$env:TEMP\install.ps1' -BayId BAY01"
+```
 
 The installer will:
 1. Prompt for the bay ID (e.g. `BAY01`) — must match a key in `config/bays.json`
