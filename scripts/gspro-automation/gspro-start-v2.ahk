@@ -76,6 +76,11 @@ class SystemState {
     ; System flags
     static isRecovering := false
     static isRestarting := false
+    static isRepairingAddon := false
+
+    ; Window presence counters (for debouncing)
+    static addonMissingCount := 0
+    static replicaMissingCount := 0
 }
 
 ; Indicator modes for the lamp
@@ -550,6 +555,8 @@ UIEnforcementTick() {
         return
 
     EnsureFullscreen(GAME_WINDOW)
+    EnsureAddonWindow()
+    EnsureOverlayWindow()
     UpdateDebugOverlayState()
 }
 
@@ -781,6 +788,100 @@ RestartOverlay() {
     Run(OVERLAY_BAT, "C:\start")
     Sleep(1200)
     SetWindowHierarchy()
+}
+
+; ##################################################################
+; ADDON & OVERLAY REPAIR
+; ##################################################################
+
+EnsureAddonWindow() {
+    ; Skip during startup, recovery, restart, or ongoing repair
+    if (SystemState.isRestarting || SystemState.isRecovering || SystemState.isRepairingAddon)
+        return
+
+    ; Only check if connector is present
+    if (!SystemState.connectorPresent)
+        return
+
+    if WinExist(ADDON_WINDOW) {
+        SystemState.addonMissingCount := 0
+        return
+    }
+
+    SystemState.addonMissingCount++
+    if (SystemState.addonMissingCount < 3)  ; ~6 seconds at 2s tick
+        return
+
+    SystemState.addonMissingCount := 0
+    SystemState.isRepairingAddon := true
+    LogStatus("Addon window missing - repairing...")
+
+    ; Switch to Shot Data tab first (standard tab)
+    try {
+        ControlClick(TAB_SHOT_DATA, CONNECTOR_WINDOW)
+    }
+
+    ; Start non-blocking retry to open Visual Data
+    SetTimer(AddonRepairTick, -1000)
+}
+
+AddonRepairTick() {
+    static clickCount := 0
+
+    if WinExist(ADDON_WINDOW) {
+        clickCount := 0
+        SystemState.isRepairingAddon := false
+        LogStatus("Addon window restored")
+        ; Restart overlay since it depends on addon
+        RestartOverlay()
+        return
+    }
+
+    if !WinExist(CONNECTOR_WINDOW) {
+        clickCount := 0
+        SystemState.isRepairingAddon := false
+        LogStatus("Connector gone during addon repair")
+        return
+    }
+
+    try {
+        ControlClick("Open Visual Data", CONNECTOR_WINDOW)
+    } catch as e {
+        LogStatus("Addon repair click failed: " . e.Message)
+    }
+
+    clickCount++
+    if (clickCount > 10) {
+        clickCount := 0
+        SystemState.isRepairingAddon := false
+        LogStatus("Addon repair failed after retries")
+        return
+    }
+
+    SetTimer(AddonRepairTick, -1000)
+}
+
+EnsureOverlayWindow() {
+    ; Skip during startup, recovery, restart, or addon repair
+    if (SystemState.isRestarting || SystemState.isRecovering || SystemState.isRepairingAddon)
+        return
+
+    ; Overlay depends on addon - don't check if addon isn't there
+    if !WinExist(ADDON_WINDOW)
+        return
+
+    if WinExist(REPLICA_WINDOW) {
+        SystemState.replicaMissingCount := 0
+        return
+    }
+
+    SystemState.replicaMissingCount++
+    if (SystemState.replicaMissingCount < 3)  ; ~6 seconds at 2s tick
+        return
+
+    SystemState.replicaMissingCount := 0
+    LogStatus("Overlay missing - restarting...")
+    RestartOverlay()
 }
 
 SetWindowHierarchy() {
