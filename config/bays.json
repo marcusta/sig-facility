@@ -12,7 +12,9 @@
   },
 
   "BAY03": {
-    "logicalBay": 3
+    "logicalBay": 3,
+    "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
+    "courseSyncStagingPath": "C:\\course_staging"
   },
 
   "BAY04": {
@@ -22,7 +24,9 @@
   },
 
   "BAY05": {
-    "logicalBay": 5
+    "logicalBay": 5,
+    "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
+    "courseSyncStagingPath": "C:\\course_staging"
   },
 
   "BAY06": {
@@ -32,7 +36,9 @@
   },
 
   "BAY07": {
-    "logicalBay": 7
+    "logicalBay": 7,
+    "courseSyncDestination": "D:\\Courses",
+    "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY08": {
