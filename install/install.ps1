@@ -194,11 +194,22 @@ function Install-SimGolfSystem {
     $gsproLnk.TargetPath = "$RepoPath\scripts\gspro-automation\gspro-start-v2.ahk"
     $gsproLnk.WorkingDirectory = "$RepoPath\scripts\gspro-automation"
     $gsproLnk.Description = "Start GSPro"
+    $gsproLnk.IconLocation = "C:\GSProV1\Core\GSProBall.ico,0"
     $gsproLnk.Save()
     Write-Success "Created master shortcut: $InstallRoot\GSPro.lnk"
 
-    # Startup launcher shortcut in shell:startup
+    # Clear existing shortcuts in shell:startup
     $startupFolder = [System.Environment]::GetFolderPath("Startup")
+    $existingShortcuts = Get-ChildItem "$startupFolder\*" -Include *.lnk, *.ahk, *.bat, *.cmd -ErrorAction SilentlyContinue
+    if ($existingShortcuts) {
+        Write-Info "Removing existing startup shortcuts..."
+        foreach ($item in $existingShortcuts) {
+            Remove-Item $item.FullName -Force
+            Write-Success "  Removed: $($item.Name)"
+        }
+    }
+
+    # Startup launcher shortcut in shell:startup
     $startupLnk = $WshShell.CreateShortcut("$startupFolder\SimGolf.lnk")
     $startupLnk.TargetPath = "$RepoPath\scripts\startup-launcher.bat"
     $startupLnk.WorkingDirectory = "$RepoPath\scripts"
