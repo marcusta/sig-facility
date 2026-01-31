@@ -1,79 +1,43 @@
 {
-  "_comment": "Bay-specific configuration. Keys are computer hostnames, not physical bay numbers. Use logicalBay field to track physical location.",
-
   "BAY01": {
     "logicalBay": 1,
-    "description": "Left corner bay - standard setup",
-    "enableDebugLogging": false,
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "3840x2160"
+    "courseSyncDestination": "D:\\GSpro_courses",
+    "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY02": {
     "logicalBay": 2,
-    "description": "Bay 2 - standard setup",
-    "networkDrive": "Y:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "2560x1440"
+    "courseSyncDestination": "D:\\Courses",
+    "courseSyncStagingPath": "D:\\course_staging"
   },
 
-  "BAY03-OLD": {
-    "_comment": "This is the old BAY03 computer that's physically in Bay 5 now due to hardware swap",
-    "logicalBay": 5,
-    "description": "Bay 5 - older hardware (originally BAY03)",
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": false,
-    "displayResolution": "1920x1080",
-    "syncIntervalSeconds": 120,
-    "enableDebugLogging": true,
-    "notes": "Older machine, runs a bit slower. Increased sync interval to reduce load."
+  "BAY03": {
+    "logicalBay": 3
   },
 
   "BAY04": {
     "logicalBay": 4,
-    "description": "Bay 4 - VIP room",
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "3840x2160",
-    "hasLoungeSeating": true,
-    "enableTelemetry": true,
-    "popupImageUrl": "https://simple-sgt.fly.dev/matchi/courts/4/show-image"
+    "courseSyncDestination": "D:\\Courses",
+    "courseSyncStagingPath": "D:\\course_staging"
   },
 
-  "BAY05-NEW": {
-    "_comment": "New replacement computer for Bay 3 (replaced BAY03-OLD which moved to Bay 5)",
-    "logicalBay": 3,
-    "description": "Bay 3 - new hardware (replacement)",
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "3840x2160",
-    "courseServerPath": "C:\\GolfSimulator\\CourseServerPro.exe",
-    "notes": "New hardware installed 2024-12. Running Pro version of course server."
+  "BAY05": {
+    "logicalBay": 5
   },
 
   "BAY06": {
     "logicalBay": 6,
-    "description": "Bay 6 - standard setup",
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "2560x1440"
+    "courseSyncDestination": "D:\\Courses",
+    "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY07": {
-    "logicalBay": 7,
-    "description": "Bay 7 - standard setup",
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "2560x1440"
+    "logicalBay": 7
   },
 
   "BAY08": {
     "logicalBay": 8,
-    "description": "Bay 8 - right corner bay",
-    "networkDrive": "Z:",
-    "hasHighSpeedCamera": true,
-    "displayResolution": "3840x2160",
-    "notes": "Corner bay with extra space"
+    "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
+    "courseSyncStagingPath": "C:\\course_staging"
   }
 }

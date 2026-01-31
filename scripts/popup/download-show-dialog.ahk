@@ -2,7 +2,7 @@
 global opacity := 0  ; Startar opacitet vid 0 (helt transparent)
 
 ; Set the path to save the image
-filePath := "C:\start\popup\dialog-image.jpg"
+filePath := "C:\SimGolf\sig-facility\scripts\popup\dialog-image.jpg"
 
 ; Set a timer to run CheckAndDownloadImage every minute (60000 milliseconds)
 SetTimer, CheckAndDownloadImage, 60000
@@ -12,7 +12,7 @@ CheckAndDownloadImage:
     If FileExist(filePath) {
         FileDelete, %filePath%
     }
-    psScriptPath := "C:\start\popup\download-file.ps1"  ; Modify this to your actual PowerShell script path
+    psScriptPath := "C:\SimGolf\sig-facility\scripts\popup\download-file.ps1"  ; Modify this to your actual PowerShell script path
     RunWait, powershell.exe -ExecutionPolicy Bypass -File "%psScriptPath%", , Hide
  
     ; Check if the file exists after the batch script has run
@@ -25,7 +25,7 @@ InitGui() {
     global opacity := 0
     Gui, +AlwaysOnTop -SysMenu +Owner +LastFound -Caption ; Konfigurerar GUI
     Gui, Margin, 0, 0
-    Gui, Add, Picture, x0 y0 w700 h400 gGuiClose, C:\start\popup\dialog-image.jpg
+    Gui, Add, Picture, x0 y0 w700 h400 gGuiClose, C:\SimGolf\sig-facility\scripts\popup\dialog-image.jpg
     WinSet, Transparent, 0
     Gui, Show, NoActivate w700 h400 x100 y300, Sweden Indoor Golf
     

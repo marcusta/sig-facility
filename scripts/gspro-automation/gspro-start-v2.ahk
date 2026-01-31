@@ -6,8 +6,8 @@
 ; ##################################################################
 
 global GSP_PATH      := "C:\GSProV1\Core\GSP\GSPro.exe"
-global SETTINGS_BAT  := "C:\start\copy_gspro_settings.bat"
-global OVERLAY_BAT   := "C:\start\start-overlay.bat"
+global SETTINGS_BAT  := "C:\SimGolf\sig-facility\scripts\gspro-settings\copy_gspro_settings.bat"
+global OVERLAY_BAT   := "C:\SimGolf\sig-facility\scripts\gspro-automation\start-overlay.bat"
 
 global GAME_WINDOW      := "ahk_exe GSPro.exe"
 global CONNECTOR_WINDOW := "ahk_exe GSPconnect.exe"
@@ -260,7 +260,7 @@ InitializeSystem() {
     if (!visualDataOpened)
         LogStatus("Warning: Visual Data window not opened")
 
-    Run(OVERLAY_BAT, "C:\start")
+    Run(OVERLAY_BAT, "C:\SimGolf\sig-facility\scripts\gspro-automation")
     Sleep(1500)
 
     ; Set window hierarchy and ensure game is in front
@@ -785,7 +785,7 @@ RestartOverlay() {
     LogStatus("Restarting Overlay...")
     if WinExist(REPLICA_WINDOW)
         WinClose(REPLICA_WINDOW)
-    Run(OVERLAY_BAT, "C:\start")
+    Run(OVERLAY_BAT, "C:\SimGolf\sig-facility\scripts\gspro-automation")
     Sleep(1200)
     SetWindowHierarchy()
 }

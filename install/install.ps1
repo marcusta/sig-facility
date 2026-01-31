@@ -6,9 +6,10 @@
 
 .DESCRIPTION
     Sets up a bay machine with:
+    - Writes bay identity to C:\SimGolf\bay-identity.json
     - Clones the sig-facility repo to C:\SimGolf\sig-facility\
     - Copies supervisor.ps1 to C:\SimGolf\supervisor.ps1
-    - Creates a scheduled task to run supervisor at login
+    - Creates shortcuts (GSPro desktop + shell:startup)
     - Safe to run multiple times (idempotent)
 
 .PARAMETER BayId
@@ -39,7 +40,6 @@ $RepoPath = "$InstallRoot\sig-facility"
 $SupervisorDestPath = "$InstallRoot\supervisor.ps1"
 $SupervisorSourcePath = "$PSScriptRoot\supervisor.ps1"
 $IdentityPath = "$InstallRoot\bay-identity.json"
-$TaskName = "SimGolf-Supervisor"
 $LogPath = "$InstallRoot\logs"
 
 # Color output functions
@@ -88,13 +88,6 @@ function Install-SimGolfSystem {
     Write-Info "Current User: $env:USERNAME"
     Write-Info "Install Root: $InstallRoot"
     Write-Host ""
-
-    # Check if running as administrator (recommended but not required)
-    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    if (-not $isAdmin) {
-        Write-Warn "Not running as Administrator. Scheduled task will run as current user only."
-        Write-Host ""
-    }
 
     # Step 1: Ensure base directory exists
     Write-Info "Step 1: Creating base directory structure..."
@@ -214,50 +207,16 @@ function Install-SimGolfSystem {
     Write-Success "Created startup shortcut: $startupFolder\SimGolf.lnk"
     Write-Host ""
 
-    # Step 6: Create or update scheduled task
-    Write-Info "Step 6: Creating scheduled task..."
-
-    # Check if task already exists
-    $existingTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
-
-    if ($existingTask) {
-        Write-Info "Task '$TaskName' already exists, removing old version..."
-        Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+    # Remove legacy scheduled task if it exists
+    $legacyTask = Get-ScheduledTask -TaskName "SimGolf-Supervisor" -ErrorAction SilentlyContinue
+    if ($legacyTask) {
+        Write-Info "Removing legacy scheduled task..."
+        Unregister-ScheduledTask -TaskName "SimGolf-Supervisor" -Confirm:$false
+        Write-Success "Legacy scheduled task removed"
     }
 
-    # Create the scheduled task
-    try {
-        $action = New-ScheduledTaskAction -Execute "powershell.exe" `
-                                          -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$SupervisorDestPath`""
-
-        $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
-
-        # Task settings
-        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries `
-                                                  -DontStopIfGoingOnBatteries `
-                                                  -StartWhenAvailable `
-                                                  -RunOnlyIfNetworkAvailable `
-                                                  -ExecutionTimeLimit (New-TimeSpan -Days 0)
-
-        # Register the task
-        Register-ScheduledTask -TaskName $TaskName `
-                               -Action $action `
-                               -Trigger $trigger `
-                               -Settings $settings `
-                               -Description "SimGolf facility supervisor - auto-updates and process management" `
-                               -User $env:USERNAME `
-                               -Force | Out-Null
-
-        Write-Success "Scheduled task '$TaskName' created successfully"
-        Write-Info "Task will run at login for user: $env:USERNAME"
-    } catch {
-        Write-Fail "Failed to create scheduled task: $_"
-        return $false
-    }
-    Write-Host ""
-
-    # Step 7: Validation
-    Write-Info "Step 7: Validating installation..."
+    # Step 6: Validation
+    Write-Info "Step 6: Validating installation..."
 
     $validationPassed = $true
 
@@ -285,11 +244,12 @@ function Install-SimGolfSystem {
         $validationPassed = $false
     }
 
-    # Check scheduled task exists
-    if (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) {
-        Write-Success "Scheduled Task: OK"
+    # Check startup shortcut
+    $startupFolder = [System.Environment]::GetFolderPath("Startup")
+    if (Test-Path "$startupFolder\SimGolf.lnk") {
+        Write-Success "Startup Shortcut: OK"
     } else {
-        Write-Fail "Scheduled Task: FAILED"
+        Write-Fail "Startup Shortcut: FAILED"
         $validationPassed = $false
     }
 
@@ -301,9 +261,8 @@ function Install-SimGolfSystem {
         Write-Host "  Installation Complete!" -ForegroundColor Green
         Write-Host "=====================================" -ForegroundColor Green
         Write-Host ""
-        Write-Success "The supervisor will start automatically at next login."
-        Write-Info "To start now, run: Start-ScheduledTask -TaskName '$TaskName'"
-        Write-Info "Or simply restart this computer."
+        Write-Success "Everything will start automatically at next login via the startup shortcut."
+        Write-Info "Reboot the machine to verify the full startup sequence."
         Write-Host ""
         Write-Info "Next steps:"
         Write-Info "  1. Ensure '$BayId' exists in config/bays.json (commit and push to main)"
@@ -323,16 +282,4 @@ function Install-SimGolfSystem {
 
 # Run installation
 $success = Install-SimGolfSystem
-
-if ($success) {
-    # Offer to start the supervisor now
-    Write-Host ""
-    $response = Read-Host "Would you like to start the supervisor now? (Y/N)"
-    if ($response -eq 'Y' -or $response -eq 'y') {
-        Write-Info "Starting supervisor task..."
-        Start-ScheduledTask -TaskName $TaskName
-        Write-Success "Supervisor started! Check logs at: $LogPath"
-    }
-}
-
 exit $(if ($success) { 0 } else { 1 })

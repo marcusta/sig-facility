@@ -7,9 +7,8 @@ Steps to set up a new SimGolf bay machine from scratch.
 - Windows 11
 - GSPro installed at `C:\GSProV1\`
 - AutoHotkey v2 installed
-- OnTopReplica installed
+- OnTopReplica installed at `C:\Program Files (x86)\OnTopReplica\`
 - Git installed and available on PATH
-- `C:\start\copy_gspro_settings.bat` and `C:\start\start-overlay.bat` in place
 
 ## Before installing
 

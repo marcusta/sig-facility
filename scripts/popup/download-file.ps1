@@ -1,15 +1,24 @@
-$url = "https://simple-sgt.fly.dev/matchi/courts/5/show-image"  # Replace this with your actual URL
-$filePath = "C:\start\popup\dialog-image.jpg"
+# Load configuration
+$scriptRoot = $PSScriptRoot
+$repoRoot = Split-Path (Split-Path $scriptRoot -Parent) -Parent
+. "$repoRoot\lib\Config.ps1"
+$config = Get-SimGolfConfig
 
-# Check if the file already exists and delete it if it does
+$logicalBay = $config.logicalBay
+if (-not $logicalBay) {
+    Write-Host "ERROR: logicalBay not set in config"
+    exit 1
+}
+
+$url = "https://simple-sgt.fly.dev/matchi/courts/$logicalBay/show-image"
+$filePath = "$repoRoot\scripts\popup\dialog-image.jpg"
+
 if (Test-Path $filePath) {
     Remove-Item $filePath
 }
 
-# Try to download the file
 try {
     Invoke-WebRequest -Uri $url -OutFile $filePath
-}
-catch {
+} catch {
     Write-Host "Failed to download the image: $_"
 }

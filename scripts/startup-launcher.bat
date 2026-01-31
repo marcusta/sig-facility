@@ -2,9 +2,10 @@
 REM SimGolf Startup Launcher — place a shortcut to this in shell:startup
 REM Master copy of the GSPro desktop shortcut lives at C:\SimGolf\GSPro.lnk
 
+set REPO=C:\SimGolf\sig-facility
 set SHORTCUT_MASTER=C:\SimGolf\GSPro.lnk
 set SHORTCUT_DESKTOP=%USERPROFILE%\Desktop\GSPro.lnk
-set OVERLAY_SCRIPT=C:\SimGolf\sig-facility\scripts\startup-overlay.ps1
+set OVERLAY_SCRIPT=%REPO%\scripts\startup-overlay.ps1
 
 REM Remove desktop shortcut during update
 if exist "%SHORTCUT_DESKTOP%" del "%SHORTCUT_DESKTOP%"
@@ -25,5 +26,11 @@ powershell.exe -Command "Get-Process powershell | Where-Object { $_.CommandLine 
 REM Restore desktop shortcut
 if exist "%SHORTCUT_MASTER%" copy "%SHORTCUT_MASTER%" "%SHORTCUT_DESKTOP%" >nul
 
+echo Starting monitoring...
+start /min powershell.exe -ExecutionPolicy Bypass -File "%REPO%\scripts\monitoring\check-status.ps1"
+
+echo Starting booking popup...
+start "" "%REPO%\scripts\popup\download-show-dialog.ahk"
+
 echo Starting GSPro automation...
-start "" "C:\SimGolf\sig-facility\scripts\gspro-automation\gspro-start-v2.ahk"
+start "" "%REPO%\scripts\gspro-automation\gspro-start-v2.ahk"

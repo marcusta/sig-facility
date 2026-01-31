@@ -5,7 +5,7 @@
     Bay status monitoring - reports disk space to central API
 
 .DESCRIPTION
-    Continuously monitors disk space on C: and D: drives and sends status
+    Continuously monitors disk space on all fixed drives and sends status
     updates to the central API endpoint. Runs as a background process
     managed by the supervisor.
 
@@ -51,23 +51,30 @@ Write-Log "Interval: $intervalSeconds seconds" -Level "INFO"
 while ($true) {
     try {
         # Get drive information
-        $cDrive = Get-PSDrive C -ErrorAction SilentlyContinue | Select-Object Free
-        $dDrive = Get-PSDrive D -ErrorAction SilentlyContinue | Select-Object Free
+        $cDrive = Get-PSDrive C -ErrorAction SilentlyContinue
+        $dDrive = Get-PSDrive D -ErrorAction SilentlyContinue
+
+        $cFree = if ($cDrive) { [math]::Round($cDrive.Free / 1GB, 2) } else { $null }
+        $dFree = if ($dDrive) { [math]::Round($dDrive.Free / 1GB, 2) } else { $null }
 
         # Build status object
         $status = @{
             machine = $machineName
             logicalBay = $logicalBay
             timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff\Z")
-            cDriveSpace = if ($cDrive) { [math]::Round($cDrive.Free / 1GB, 2) } else { 0 }
-            dDriveSpace = if ($dDrive) { [math]::Round($dDrive.Free / 1GB, 2) } else { 0 }
+            cDriveSpace = if ($null -ne $cFree) { $cFree } else { 0 }
+        }
+        if ($null -ne $dFree) {
+            $status.dDriveSpace = $dFree
         }
 
         # Send to API
         $json = $status | ConvertTo-Json
         $response = Invoke-RestMethod -Uri $serverUrl -Method Post -Body $json -ContentType "application/json" -TimeoutSec 10
 
-        Write-Log "Status sent: C=$($status.cDriveSpace)GB, D=$($status.dDriveSpace)GB" -Level "INFO"
+        $logMsg = "C=$($cFree)GB"
+        if ($null -ne $dFree) { $logMsg += ", D=$($dFree)GB" }
+        Write-Log "Status sent: $logMsg" -Level "INFO"
 
     } catch {
         $errorMsg = "Error sending status: $_"
