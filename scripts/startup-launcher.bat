@@ -20,11 +20,7 @@ echo Waiting for supervisor to finish initial update...
 timeout /t 30 /nobreak >nul
 
 REM Close the overlay using saved PID
-if exist "C:\SimGolf\overlay.pid" (
-    set /p OVERLAY_PID=<"C:\SimGolf\overlay.pid"
-    taskkill /pid %OVERLAY_PID% /f >nul 2>&1
-    del "C:\SimGolf\overlay.pid" >nul 2>&1
-)
+powershell.exe -Command "if (Test-Path 'C:\SimGolf\overlay.pid') { $p = Get-Content 'C:\SimGolf\overlay.pid'; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue; Remove-Item 'C:\SimGolf\overlay.pid' -Force }"
 
 REM Restore desktop shortcut
 if exist "%SHORTCUT_MASTER%" copy "%SHORTCUT_MASTER%" "%SHORTCUT_DESKTOP%" >nul
