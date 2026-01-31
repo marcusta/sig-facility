@@ -11,23 +11,23 @@
     - Creates a scheduled task to run supervisor at login
     - Safe to run multiple times (idempotent)
 
-.PARAMETER BayNumber
-    The bay number (1-8) for this machine. Used for validation and documentation.
+.PARAMETER BayId
+    The bay identifier (e.g. BAY01, BAY02). Must match a key in config/bays.json.
+    If not provided, the script will prompt for it.
 
 .PARAMETER RepoUrl
-    Git repository URL. Defaults to the placeholder in the script.
+    Git repository URL. Defaults to the sig-facility repo.
 
 .EXAMPLE
-    .\install.ps1 -BayNumber 1
+    .\install.ps1 -BayId BAY01
 
 .EXAMPLE
-    .\install.ps1 -BayNumber 3 -RepoUrl "https://github.com/your-username/sig-facility.git"
+    .\install.ps1
 #>
 
 param(
     [Parameter(Mandatory = $false)]
-    [ValidateRange(1, 8)]
-    [int]$BayNumber,
+    [string]$BayId,
 
     [Parameter(Mandatory = $false)]
     [string]$RepoUrl = "https://github.com/marcusta/sig-facility.git"
@@ -38,6 +38,7 @@ $InstallRoot = "C:\SimGolf"
 $RepoPath = "$InstallRoot\sig-facility"
 $SupervisorDestPath = "$InstallRoot\supervisor.ps1"
 $SupervisorSourcePath = "$PSScriptRoot\supervisor.ps1"
+$IdentityPath = "$InstallRoot\bay-identity.json"
 $TaskName = "SimGolf-Supervisor"
 $LogPath = "$InstallRoot\logs"
 
@@ -70,11 +71,20 @@ function Install-SimGolfSystem {
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host ""
 
+    # Prompt for bay ID if not provided
+    if (-not $BayId) {
+        Write-Host ""
+        Write-Info "Available bay IDs are defined in config/bays.json (e.g. BAY01, BAY02, ...)"
+        $BayId = Read-Host "Enter the bay ID for this machine"
+        if (-not $BayId) {
+            Write-Fail "Bay ID is required."
+            return $false
+        }
+    }
+
     # Display computer info
     Write-Info "Computer Name: $env:COMPUTERNAME"
-    if ($BayNumber) {
-        Write-Info "Bay Number: $BayNumber"
-    }
+    Write-Info "Bay ID: $BayId"
     Write-Info "Current User: $env:USERNAME"
     Write-Info "Install Root: $InstallRoot"
     Write-Host ""
@@ -103,8 +113,15 @@ function Install-SimGolfSystem {
     }
     Write-Host ""
 
-    # Step 2: Clone or update repository
-    Write-Info "Step 2: Setting up repository..."
+    # Step 2: Write bay identity file
+    Write-Info "Step 2: Writing bay identity..."
+    $identityJson = @{ bayId = $BayId } | ConvertTo-Json
+    Set-Content -Path $IdentityPath -Value $identityJson -Force
+    Write-Success "Bay identity written to $IdentityPath (bayId: $BayId)"
+    Write-Host ""
+
+    # Step 3: Clone or update repository
+    Write-Info "Step 3: Setting up repository..."
 
     # Check if git is available
     $gitAvailable = Get-Command git -ErrorAction SilentlyContinue
@@ -144,8 +161,8 @@ function Install-SimGolfSystem {
     }
     Write-Host ""
 
-    # Step 3: Copy supervisor script
-    Write-Info "Step 3: Installing supervisor script..."
+    # Step 4: Copy supervisor script
+    Write-Info "Step 4: Installing supervisor script..."
 
     # If supervisor.ps1 doesn't exist locally, download it from GitHub
     if (-not (Test-Path $SupervisorSourcePath)) {
@@ -174,8 +191,31 @@ function Install-SimGolfSystem {
     }
     Write-Host ""
 
-    # Step 4: Create or update scheduled task
-    Write-Info "Step 4: Creating scheduled task..."
+    # Step 5: Create shortcuts
+    Write-Info "Step 5: Creating shortcuts..."
+
+    $WshShell = New-Object -ComObject WScript.Shell
+
+    # Master GSPro desktop shortcut at C:\SimGolf\GSPro.lnk
+    $gsproLnk = $WshShell.CreateShortcut("$InstallRoot\GSPro.lnk")
+    $gsproLnk.TargetPath = "$RepoPath\scripts\gspro-automation\gspro-start-v2.ahk"
+    $gsproLnk.WorkingDirectory = "$RepoPath\scripts\gspro-automation"
+    $gsproLnk.Description = "Start GSPro"
+    $gsproLnk.Save()
+    Write-Success "Created master shortcut: $InstallRoot\GSPro.lnk"
+
+    # Startup launcher shortcut in shell:startup
+    $startupFolder = [System.Environment]::GetFolderPath("Startup")
+    $startupLnk = $WshShell.CreateShortcut("$startupFolder\SimGolf.lnk")
+    $startupLnk.TargetPath = "$RepoPath\scripts\startup-launcher.bat"
+    $startupLnk.WorkingDirectory = "$RepoPath\scripts"
+    $startupLnk.Description = "SimGolf Startup Launcher"
+    $startupLnk.Save()
+    Write-Success "Created startup shortcut: $startupFolder\SimGolf.lnk"
+    Write-Host ""
+
+    # Step 6: Create or update scheduled task
+    Write-Info "Step 6: Creating scheduled task..."
 
     # Check if task already exists
     $existingTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
@@ -216,10 +256,18 @@ function Install-SimGolfSystem {
     }
     Write-Host ""
 
-    # Step 5: Validation
-    Write-Info "Step 5: Validating installation..."
+    # Step 7: Validation
+    Write-Info "Step 7: Validating installation..."
 
     $validationPassed = $true
+
+    # Check identity file
+    if (Test-Path $IdentityPath) {
+        Write-Success "Bay Identity: OK ($BayId)"
+    } else {
+        Write-Fail "Bay Identity: FAILED"
+        $validationPassed = $false
+    }
 
     # Check repo exists
     if (Test-Path "$RepoPath\.git") {
@@ -258,9 +306,8 @@ function Install-SimGolfSystem {
         Write-Info "Or simply restart this computer."
         Write-Host ""
         Write-Info "Next steps:"
-        Write-Info "  1. Update config/bays.json with this bay's specific settings"
-        Write-Info "  2. Add your business logic scripts to scripts/"
-        Write-Info "  3. Update supervisor.ps1 to reference your main script"
+        Write-Info "  1. Ensure '$BayId' exists in config/bays.json (commit and push to main)"
+        Write-Info "  2. Reboot the machine to verify the full startup sequence"
         Write-Host ""
         return $true
     } else {

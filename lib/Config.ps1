@@ -8,8 +8,9 @@
 
     Configuration is loaded from:
     1. config/shared.json - Settings that apply to all bays
-    2. config/bays.json - Bay-specific overrides keyed by hostname
+    2. config/bays.json - Bay-specific overrides keyed by bay ID
 
+    Bay identity is read from C:\SimGolf\bay-identity.json (contains {"bayId": "BAY01"}).
     Bay-specific settings override shared settings.
 
 .EXAMPLE
@@ -67,19 +68,34 @@ function Get-SimGolfConfig {
         Write-Warning "Shared config not found at: $sharedConfigPath"
     }
 
+    # Resolve bay identity from C:\SimGolf\bay-identity.json
+    $identityPath = "C:\SimGolf\bay-identity.json"
+    $bayId = $null
+
+    if (Test-Path $identityPath) {
+        try {
+            $identity = Get-Content $identityPath -Raw | ConvertFrom-Json
+            $bayId = $identity.bayId
+            Write-Verbose "Bay identity from file: $bayId"
+        } catch {
+            Write-Warning "Failed to read bay identity from $identityPath : $_"
+        }
+    } else {
+        Write-Warning "Bay identity file not found at $identityPath — using shared config only"
+    }
+
     # Load bay-specific config
-    if (Test-Path $baysConfigPath) {
+    if ($bayId -and (Test-Path $baysConfigPath)) {
         try {
             $baysJson = Get-Content $baysConfigPath -Raw | ConvertFrom-Json
-            $hostname = $env:COMPUTERNAME
 
-            Write-Verbose "Looking for bay config for hostname: $hostname"
+            Write-Verbose "Looking for bay config for: $bayId"
 
-            # Check if this hostname has a specific config
-            $bayConfig = $baysJson.PSObject.Properties | Where-Object { $_.Name -eq $hostname } | Select-Object -First 1
+            # Check if this bay ID has a specific config
+            $bayConfig = $baysJson.PSObject.Properties | Where-Object { $_.Name -eq $bayId } | Select-Object -First 1
 
             if ($bayConfig) {
-                Write-Verbose "Found bay-specific config for: $hostname"
+                Write-Verbose "Found bay-specific config for: $bayId"
 
                 # Merge bay-specific settings (override shared settings)
                 $bayConfig.Value.PSObject.Properties | ForEach-Object {
@@ -93,16 +109,15 @@ function Get-SimGolfConfig {
                     }
                 }
             } else {
-                Write-Verbose "No bay-specific config found for hostname: $hostname (using shared config only)"
+                Write-Warning "Bay ID '$bayId' not found in bays.json — using shared config only"
             }
         } catch {
             Write-Warning "Failed to load bays config from $baysConfigPath : $_"
         }
-    } else {
-        Write-Warning "Bays config not found at: $baysConfigPath"
     }
 
     # Add computed properties
+    $config | Add-Member -NotePropertyName "_bayId" -NotePropertyValue $bayId -Force
     $config | Add-Member -NotePropertyName "_hostname" -NotePropertyValue $env:COMPUTERNAME -Force
     $config | Add-Member -NotePropertyName "_loadedAt" -NotePropertyValue (Get-Date) -Force
 
