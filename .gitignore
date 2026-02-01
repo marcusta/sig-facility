@@ -44,6 +44,7 @@ secrets.json
 bin/
 obj/
 *.dll
+!lib/ahk/WebView2/64bit/WebView2Loader.dll
 *.so
 *.dylib
 
