@@ -59,8 +59,10 @@ try {
         }
     }
 
-    git fetch origin 2>&1 | Out-Null
-    git reset --hard "origin/$Branch" 2>&1 | Out-Null
+    $ErrorActionPreference = "Continue"
+    git fetch origin 2>$null
+    git reset --hard "origin/$Branch" 2>$null
+    $ErrorActionPreference = "Stop"
 
     Write-Host ""
     Write-Host "=== DEV MODE ACTIVE ===" -ForegroundColor Green
@@ -73,11 +75,16 @@ try {
     try {
         while ($true) {
             Start-Sleep -Seconds 5
-            git fetch origin 2>&1 | Out-Null
-            $remoteCommit = git rev-parse "origin/$Branch" 2>&1 | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }
+            # Git writes progress to stderr; suppress ErrorActionPreference during git calls
+            $ErrorActionPreference = "Continue"
+            git fetch origin 2>$null
+            $remoteCommit = (git rev-parse "origin/$Branch" 2>$null)
+            $ErrorActionPreference = "Stop"
             if ($remoteCommit -and $remoteCommit -ne $lastCommit) {
                 Write-Host "[$(Get-Date -Format 'HH:mm:ss')] New commits detected, pulling..." -ForegroundColor Yellow
-                git reset --hard "origin/$Branch" 2>&1 | Out-Null
+                $ErrorActionPreference = "Continue"
+                git reset --hard "origin/$Branch" 2>$null
+                $ErrorActionPreference = "Stop"
                 $lastCommit = git rev-parse HEAD
                 $msg = git log -1 --pretty=format:"%s"
                 Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Updated to: $lastCommit ($msg)" -ForegroundColor Green
