@@ -66,10 +66,18 @@ ShowDialog(imagePath) {
         dlg := false
     }
 
+    if !FileExist(imagePath)
+        return
+
     dlg := Gui("+AlwaysOnTop -SysMenu +Owner -Caption")
     dlg.MarginX := 0
     dlg.MarginY := 0
-    dlg.AddPicture("x0 y0 w700 h400", imagePath)
+    try
+        dlg.AddPicture("x0 y0 w700 h400", imagePath)
+    catch {
+        dlg.Destroy()
+        return
+    }
     dlg.OnEvent("Close", (*) => dlg.Destroy())
 
     ; Click anywhere to dismiss
