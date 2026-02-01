@@ -59,7 +59,8 @@ try {
         }
     }
 
-    git pull --ff-only
+    git fetch origin 2>&1 | Out-Null
+    git reset --hard "origin/$Branch" 2>&1 | Out-Null
 
     Write-Host ""
     Write-Host "=== DEV MODE ACTIVE ===" -ForegroundColor Green
@@ -76,7 +77,7 @@ try {
             $remoteCommit = git rev-parse "origin/$Branch" 2>&1 | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }
             if ($remoteCommit -and $remoteCommit -ne $lastCommit) {
                 Write-Host "[$(Get-Date -Format 'HH:mm:ss')] New commits detected, pulling..." -ForegroundColor Yellow
-                git pull --ff-only
+                git reset --hard "origin/$Branch" 2>&1 | Out-Null
                 $lastCommit = git rev-parse HEAD
                 $msg = git log -1 --pretty=format:"%s"
                 Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Updated to: $lastCommit ($msg)" -ForegroundColor Green
