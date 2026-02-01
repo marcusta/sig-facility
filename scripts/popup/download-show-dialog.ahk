@@ -8,11 +8,7 @@ filePath := "C:\SimGolf\sig-facility\scripts\popup\dialog-image.jpg"
 SetTimer, CheckAndDownloadImage, 60000
 
 CheckAndDownloadImage:
-    ; Ensure the directory exists
-    If FileExist(filePath) {
-        FileDelete, %filePath%
-    }
-    psScriptPath := "C:\SimGolf\sig-facility\scripts\popup\download-file.ps1"  ; Modify this to your actual PowerShell script path
+    psScriptPath := "C:\SimGolf\sig-facility\scripts\popup\download-file.ps1"
     RunWait, powershell.exe -ExecutionPolicy Bypass -File "%psScriptPath%", , Hide
  
     ; Check if the file exists after the batch script has run

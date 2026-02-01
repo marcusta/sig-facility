@@ -13,12 +13,17 @@ if (-not $logicalBay) {
 $url = "https://app.swedenindoorgolf.se/bookings/courts/$logicalBay/show-image"
 $filePath = "$repoRoot\scripts\popup\dialog-image.jpg"
 
-if (Test-Path $filePath) {
-    Remove-Item $filePath
-}
+$tempPath = "$filePath.tmp"
 
 try {
-    Invoke-WebRequest -Uri $url -OutFile $filePath
+    Invoke-WebRequest -Uri $url -OutFile $tempPath -ErrorAction Stop
+    if ((Test-Path $tempPath) -and (Get-Item $tempPath).Length -gt 0) {
+        if (Test-Path $filePath) { Remove-Item $filePath }
+        Move-Item $tempPath $filePath -Force
+    } else {
+        if (Test-Path $tempPath) { Remove-Item $tempPath }
+    }
 } catch {
     Write-Host "Failed to download the image: $_"
+    if (Test-Path $tempPath) { Remove-Item $tempPath }
 }
