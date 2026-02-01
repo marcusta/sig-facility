@@ -13,6 +13,8 @@ if (-not $logicalBay) {
 $url = "https://app.swedenindoorgolf.se/bookings/courts/$logicalBay/show-image"
 $filePath = "$repoRoot\scripts\popup\dialog-image.jpg"
 
+if (Test-Path $filePath) { Remove-Item $filePath }
+
 $tempPath = "$filePath.tmp"
 
 try {
