@@ -69,3 +69,4 @@ scripts/
 - AHK v2 scripts use `#Requires AutoHotkey v2.0`
 - The older `gspro-start.ahk` is AHK v1; `gspro-start-v2.ahk` is the active version
 - Do NOT add `Co-Authored-By` lines to commit messages
+- Never use non-ASCII characters in source files (no em dashes, curly quotes, etc.) - PowerShell 5 on the bays misreads UTF-8 multibyte characters. Use plain ASCII: hyphens (`-`), straight quotes (`"`/`'`), etc.
