@@ -72,8 +72,8 @@ try {
     try {
         while ($true) {
             Start-Sleep -Seconds 5
-            git fetch origin 2>$null
-            $remoteCommit = git rev-parse "origin/$Branch" 2>$null
+            git fetch origin 2>&1 | Out-Null
+            $remoteCommit = git rev-parse "origin/$Branch" 2>&1 | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }
             if ($remoteCommit -and $remoteCommit -ne $lastCommit) {
                 Write-Host "[$(Get-Date -Format 'HH:mm:ss')] New commits detected, pulling..." -ForegroundColor Yellow
                 git pull --ff-only
@@ -101,7 +101,7 @@ try {
                 -WindowStyle Hidden
             Write-Host "Supervisor restarted." -ForegroundColor Green
         } else {
-            Write-Host "Supervisor not found at $supervisorPath — skipping restart." -ForegroundColor Yellow
+            Write-Host "Supervisor not found at $supervisorPath -skipping restart." -ForegroundColor Yellow
         }
     }
 } finally {
