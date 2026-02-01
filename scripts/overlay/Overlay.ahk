@@ -17,6 +17,9 @@ class Overlay {
     wv  := ""       ; WebView2.Core (CoreWebView2)
     _visible := false
 
+    __New() {
+    }
+
     /**
      * Create and display the overlay window.
      * @param {String} url       URL or file:/// path to load
