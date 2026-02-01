@@ -13,8 +13,8 @@
     - Handles initial repo clone if needed
 
 .NOTES
-    This script is installed once and rarely changes. To update it, you must
-    manually replace it on each bay or re-run the installer.
+    Self-updates from the repo copy (install/supervisor.ps1) after each git pull.
+    Also updated by startup-launcher.bat on each reboot.
 #>
 
 # Configuration
@@ -22,6 +22,8 @@ $RepoPath = "C:\SimGolf\sig-facility"
 $RepoUrl = "https://github.com/marcusta/sig-facility.git"
 $BackgroundScriptPath = "$RepoPath\scripts\monitoring\check-status.ps1"
 $RestartSignalFile = "C:\SimGolf\restart-requested"
+$SupervisorRepoPath = "$RepoPath\install\supervisor.ps1"
+$SupervisorRunningPath = "C:\SimGolf\supervisor.ps1"
 $CheckIntervalSeconds = 1800  # 30 minutes
 $LogPath = "C:\SimGolf\logs"
 $LogFile = "$LogPath\supervisor-$(Get-Date -Format 'yyyy-MM-dd').log"
@@ -119,7 +121,7 @@ function Update-Repository {
 function Test-BackgroundProcessRunning {
     # Look for PowerShell process running our background script
     $processes = Get-Process -Name pwsh, powershell -ErrorAction SilentlyContinue | Where-Object {
-        $_.CommandLine -like "*background-monitor.ps1*"
+        $_.CommandLine -like "*check-status.ps1*"
     }
 
     return ($null -ne $processes -and $processes.Count -gt 0)
@@ -175,11 +177,31 @@ function Request-BackgroundRestart {
     # If still running after timeout, force kill
     Write-Log "Background process did not stop gracefully, force killing" -Level "WARN"
     Get-Process -Name pwsh, powershell -ErrorAction SilentlyContinue | Where-Object {
-        $_.CommandLine -like "*background-monitor.ps1*"
+        $_.CommandLine -like "*check-status.ps1*"
     } | Stop-Process -Force
 
     Start-Sleep -Seconds 2
     return $true
+}
+
+# Self-update: replace running supervisor if repo version differs, then restart
+function Update-Supervisor {
+    if (-not (Test-Path $SupervisorRepoPath)) {
+        return
+    }
+
+    $repoHash = (Get-FileHash $SupervisorRepoPath -Algorithm SHA256).Hash
+    $runningHash = (Get-FileHash $SupervisorRunningPath -Algorithm SHA256).Hash
+
+    if ($repoHash -ne $runningHash) {
+        Write-Log "Supervisor update detected, replacing and restarting..." -Level "INFO"
+        Copy-Item -Path $SupervisorRepoPath -Destination $SupervisorRunningPath -Force
+        Start-Process -FilePath "powershell.exe" `
+                      -ArgumentList "-ExecutionPolicy", "Bypass", "-File", "`"$SupervisorRunningPath`"" `
+                      -WindowStyle Hidden
+        Write-Log "New supervisor instance started, exiting old instance" -Level "INFO"
+        exit 0
+    }
 }
 
 # Main supervisor loop
@@ -195,6 +217,11 @@ function Start-Supervisor {
 
             # Pull updates and check if anything changed
             $changesDetected = Update-Repository -Path $RepoPath -Url $RepoUrl
+
+            # Self-update supervisor if repo version changed (exits if updated)
+            if ($changesDetected) {
+                Update-Supervisor
+            }
 
             # Restart if changes detected OR background process not running
             $isRunning = Test-BackgroundProcessRunning

@@ -13,6 +13,9 @@ if exist "%SHORTCUT_DESKTOP%" del "%SHORTCUT_DESKTOP%"
 REM Show "please wait" overlay
 start /min powershell.exe -ExecutionPolicy Bypass -File "%OVERLAY_SCRIPT%"
 
+REM Update supervisor from repo before starting it
+if exist "%REPO%\install\supervisor.ps1" copy /Y "%REPO%\install\supervisor.ps1" "C:\SimGolf\supervisor.ps1" >nul
+
 echo Starting SimGolf supervisor...
 start /min powershell.exe -ExecutionPolicy Bypass -File "C:\SimGolf\supervisor.ps1"
 
