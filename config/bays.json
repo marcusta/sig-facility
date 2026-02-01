@@ -1,18 +1,21 @@
 {
   "BAY01": {
     "logicalBay": 1,
+    "matchiCourtId": 2068,
     "courseSyncDestination": "D:\\GSpro_courses",
     "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY02": {
     "logicalBay": 2,
+    "matchiCourtId": 2069,
     "courseSyncDestination": "D:\\Courses",
     "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY03": {
     "logicalBay": 3,
+    "matchiCourtId": 2074,
     "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
     "courseSyncStagingPath": "C:\\course_staging",
     "hasRelay": false
@@ -20,30 +23,35 @@
 
   "BAY04": {
     "logicalBay": 4,
+    "matchiCourtId": 2071,
     "courseSyncDestination": "D:\\Courses",
     "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY05": {
     "logicalBay": 5,
+    "matchiCourtId": 2072,
     "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
     "courseSyncStagingPath": "C:\\course_staging"
   },
 
   "BAY06": {
     "logicalBay": 6,
+    "matchiCourtId": 2070,
     "courseSyncDestination": "D:\\Courses",
     "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY07": {
     "logicalBay": 7,
+    "matchiCourtId": 2076,
     "courseSyncDestination": "D:\\Courses",
     "courseSyncStagingPath": "D:\\course_staging"
   },
 
   "BAY08": {
     "logicalBay": 8,
+    "matchiCourtId": 2077,
     "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
     "courseSyncStagingPath": "C:\\course_staging"
   }

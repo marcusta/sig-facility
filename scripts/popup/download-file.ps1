@@ -22,13 +22,13 @@ $repoRoot = Split-Path (Split-Path $scriptRoot -Parent) -Parent
 . "$repoRoot\lib\Config.ps1"
 $config = Get-SimGolfConfig
 
-$logicalBay = $config.logicalBay
-if (-not $logicalBay) {
-    Write-Host "ERROR: logicalBay not set in config"
+$matchiCourtId = $config.matchiCourtId
+if (-not $matchiCourtId) {
+    Write-Host "ERROR: matchiCourtId not set in config"
     exit 1
 }
 
-$url = "https://app.swedenindoorgolf.se/bookings/courts/$logicalBay/show-image"
+$url = "https://app.swedenindoorgolf.se/bookings/matchi-courts/$matchiCourtId/show-image"
 $filePath = "$repoRoot\scripts\popup\dialog-image.jpg"
 
 if (Test-Path $filePath) { Remove-Item $filePath }
