@@ -17,22 +17,22 @@ if !FileExist(htmlPath) {
 ; Convert to file:/// URL
 fileUrl := "file:///" StrReplace(htmlPath, "\", "/")
 
-; --- Create overlay ---
-overlay := Overlay()
-overlay.Show(fileUrl, {w: 800, h: 600})
+; --- Create wnd ---
+wnd := Overlay()
+wnd.Show(fileUrl, {w: 800, h: 600})
 
 ; --- Hotkeys ---
-^+r:: overlay.Reload()                                              ; Ctrl+Shift+R — reload
+^+r:: wnd.Reload()                                              ; Ctrl+Shift+R — reload
 
-^+1:: overlay.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))   ; test page
+^+1:: wnd.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))   ; test page
 ^+2:: {                                                              ; placeholder boot page
-    overlay.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))
+    wnd.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))
 }
 ^+3:: {                                                              ; placeholder help page
-    overlay.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))
+    wnd.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))
 }
 
 Escape:: {
-    overlay.Destroy()
+    wnd.Destroy()
     ExitApp
 }
