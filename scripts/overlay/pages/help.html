@@ -63,9 +63,6 @@
       }
 
       .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 16px;
         width: 36px;
         height: 36px;
         border-radius: 8px;
@@ -73,6 +70,7 @@
         background: var(--bg-secondary);
         color: var(--text-secondary);
         font-size: 1.25rem;
+        flex-shrink: 0;
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -144,6 +142,7 @@
 
       .topbar-title {
         margin-left: auto;
+        margin-right: 0.75rem;
         font-size: 1.05rem;
         font-weight: 600;
         color: var(--text-muted);
@@ -830,7 +829,6 @@
   <body>
     <div class="backdrop" id="backdrop"></div>
     <div class="help-container">
-    <button class="close-btn" id="close-btn">&#x2715;</button>
     <!-- ===== TOPBAR ===== -->
     <div class="topbar">
       <div class="topbar-brand">
@@ -838,6 +836,7 @@
         <span>SWEDEN <span class="accent">INDOOR GOLF</span></span>
       </div>
       <div class="topbar-title">Hjälpcenter</div>
+      <button class="close-btn" id="close-btn">&#x2715;</button>
     </div>
 
     <!-- ===== LAYOUT ===== -->

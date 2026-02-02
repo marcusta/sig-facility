@@ -33,8 +33,16 @@ SetTimer(afterStartup, -5000)
 ^+a:: mgr.SetHelpAlert(true)   ; Ctrl+Shift+A -- test alert
 ^+s:: mgr.SetHelpAlert(false)  ; Ctrl+Shift+S -- clear alert
 
-^+x::
 Escape:: {
+    if mgr._helpOv.IsOpen()
+        mgr._helpOv.Close()
+    else {
+        mgr.Cleanup()
+        ExitApp()
+    }
+}
+
+^+x:: {
     mgr.Cleanup()
     ExitApp()
 }
