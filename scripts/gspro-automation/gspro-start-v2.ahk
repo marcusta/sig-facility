@@ -250,13 +250,15 @@ InitializeSystem() {
         return
     }
 
-    LogStatus("Connector found, waiting for UI...")
-    Sleep(2000)  ; Give the connector UI time to fully load
+    LogStatus("Connector found, waiting for connection...")
+}
+
+OpenVisualDataAndSetup() {
+    LogStatus("Opening Visual Data...")
 
     WinActivate(CONNECTOR_WINDOW)
     Sleep(500)
 
-    LogStatus("Opening Visual Data...")
     visualDataOpened := false
     Loop 15 {
         if !WinExist(GAME_WINDOW) {
@@ -270,7 +272,7 @@ InitializeSystem() {
         }
 
         try {
-            ControlClick("Open Visual Data", CONNECTOR_WINDOW, , "Left", 1, "NA")
+            ControlClick("Open Visual Data", CONNECTOR_WINDOW)
             LogStatus("Clicked Open Visual Data (" . A_Index . ")")
         } catch as e {
             LogStatus("Click failed: " . e.Message)
@@ -290,12 +292,10 @@ InitializeSystem() {
     Run(OVERLAY_BAT, "C:\SimGolf\sig-facility\scripts\gspro-automation")
     Sleep(1500)
 
-    ; Set window hierarchy and ensure game is in front
     LogStatus("Setting window hierarchy...")
     SetWindowHierarchy()
     Sleep(500)
 
-    ; Activate game window one more time to ensure it's on top
     if WinExist(GAME_WINDOW) {
         WinActivate(GAME_WINDOW)
         WinMoveTop(GAME_WINDOW)
@@ -407,9 +407,10 @@ SampleConnection(hwnd) {
             SystemState.connectionStable := true
             if !SystemState.connectionEverGreen {
                 SystemState.connectionEverGreen := true
-                ; First time connected -- hide startup overlay
+                ; First time connected -- hide startup overlay, then set up UI
                 if OverlayMgr
                     OverlayMgr.HideStartup()
+                SetTimer(OpenVisualDataAndSetup, -500)
             }
             LogStatus("Connection: STABLE (debounced)")
 
