@@ -124,7 +124,7 @@ DebugGui.SetFont("s10 cGreen", "Consolas")
 DebugText := DebugGui.Add("Text", "w350 h108 vExpandedText", "Initializing...")
 
 ; Start expanded (lower left corner)
-debugY := A_ScreenHeight - 129
+debugY := A_ScreenHeight - 130
 DebugGui.Show("x10 y" . debugY . " NoActivate")
 
 ExpandDebugOverlay() {
@@ -137,7 +137,7 @@ ExpandDebugOverlay() {
     debugCollapseTimer := 0
 
     DebugText.Visible := true
-    debugY := A_ScreenHeight - 129
+    debugY := A_ScreenHeight - 130
     DebugGui.Show("x10 y" . debugY . " w358 h116 NoActivate")
 }
 
@@ -149,7 +149,7 @@ CollapseDebugOverlay() {
 
     debugExpanded := false
     DebugText.Visible := false
-    debugY := A_ScreenHeight - 29
+    debugY := A_ScreenHeight - 30
     DebugGui.Show("x10 y" . debugY . " w16 h16 NoActivate")
 }
 
