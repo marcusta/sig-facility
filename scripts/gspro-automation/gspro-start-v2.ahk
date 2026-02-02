@@ -197,11 +197,11 @@ UpdateDebugOverlayState() {
 ; HOTKEYS
 ; ##################################################################
 
-; Ctrl+Shift+X to force-hide all overlays
+; Ctrl+Shift+X to force-quit
 ^+x:: {
     if OverlayMgr
         OverlayMgr.Cleanup()
-    LogStatus("Overlays force-closed")
+    ExitApp()
 }
 
 ; Ctrl+Shift+D to toggle debug overlay
