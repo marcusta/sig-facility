@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweden Indoor Golf - Startup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #eab308;
+    --bg: #020617;
+    --bg-secondary: #0f172a;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: #1e293b;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ========== TOPBAR ========== */
+  .topbar {
+    height: 56px;
+    background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(234, 179, 8, 0.04) 50%, var(--bg-secondary) 100%);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    flex-shrink: 0;
+    z-index: 20;
+    position: relative;
+  }
+
+  .topbar::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 20%, rgba(234, 179, 8, 0.25), transparent 80%);
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .topbar-brand img {
+    height: 32px;
+    width: auto;
+  }
+
+  .topbar-brand span {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+  }
+
+  .topbar-brand .accent {
+    color: var(--primary);
+  }
+
+  /* ========== BACKGROUND & ATMOSPHERE ========== */
+
+  /* Golden radial from top-right corner */
+  .golden-gradient {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top right, rgba(234, 179, 8, 0.15) 0%, rgba(234, 179, 8, 0.05) 35%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Accent line at top of main content */
+  .main-content-inner-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 5%, var(--primary) 50%, transparent 95%);
+    opacity: 0.5;
+    z-index: 3;
+  }
+
+  .slide { z-index: 2; }
+
+  /* ========== MAIN CONTENT SLIDES (top 75%) ========== */
+  .main-content {
+    flex: 3;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 4rem;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  /* --- Slide 1: Video --- */
+  .slide-video {
+    padding: 2rem;
+  }
+
+  .slide-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 16px;
+  }
+
+  /* --- Slide 2: Ball placement --- */
+  .slide-ball {
+    flex-direction: row;
+    gap: 3rem;
+  }
+
+  .ball-image-wrap {
+    flex: 1;
+    max-width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ball-image-wrap img {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .ball-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .ball-info h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .ball-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .ball-callout-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.5rem;
+  }
+
+  .ball-callout-icon.place {
+    background: rgba(234, 179, 8, 0.15);
+  }
+
+  .ball-callout-icon.warn {
+    background: rgba(239, 68, 68, 0.15);
+  }
+
+  .ball-callout h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .ball-callout p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  .ball-callout.warn h3 {
+    color: #f87171;
+  }
+
+  /* --- Slide 3: Getting started --- */
+  .slide-start {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .slide-start h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .steps {
+    display: flex;
+    gap: 2.5rem;
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .step {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .step-num {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(234, 179, 8, 0.15);
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .step h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+
+  .step p {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .step .highlight {
+    display: inline-block;
+    background: rgba(234, 179, 8, 0.15);
+    color: var(--primary);
+    font-weight: 700;
+    padding: 0.125rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  /* --- Slide 4: Troubleshooting --- */
+  .slide-help {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .slide-help h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .help-cards {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .help-card {
+    flex: 1;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .help-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+  }
+
+  .help-card-icon.restart {
+    background: rgba(234, 179, 8, 0.15);
+  }
+
+  .help-card-icon.contact {
+    background: rgba(99, 102, 241, 0.15);
+  }
+
+  .help-card h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+
+  .help-card p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .help-card .email {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  /* Slide indicator dots */
+  .slide-dots {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .slide-dots .sdot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s, width 0.3s;
+  }
+
+  .slide-dots .sdot.active {
+    background: var(--primary);
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  /* ========== FOOTER (bottom 25%) ========== */
+  .startup-footer {
+    flex: 1;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .startup-footer::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    opacity: 0.4;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .spinner-ring {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .message-area {
+    text-align: center;
+    height: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .message {
+    position: absolute;
+    white-space: nowrap;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .message.active { opacity: 1; transform: translateY(0); }
+  .message.exit-up { opacity: 0; transform: translateY(-20px); }
+  .message.enter-below { opacity: 0; transform: translateY(20px); }
+
+  .message-main {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .progress-dots .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s ease;
+  }
+
+  .progress-dots .dot.active { background: var(--primary); }
+  .progress-dots .dot.done { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+  <!-- ===== TOPBAR ===== -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="../../../sig-web/public/logo.png" alt="Sweden Indoor Golf">
+      <span>SWEDEN <span class="accent">INDOOR GOLF</span></span>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT SLIDES ===== -->
+  <div class="main-content">
+    <div class="golden-gradient"></div>
+    <div class="main-content-inner-top"></div>
+
+    <!-- Slide 1: Instruction video -->
+    <div class="slide slide-video active" data-slide="0">
+      <video autoplay muted loop playsinline id="start-video">
+        <source src="../../../sig-web/public/support/sig-start.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Slide 2: Ball placement -->
+    <div class="slide slide-ball" data-slide="1">
+      <div class="ball-image-wrap">
+        <img id="mat-image" src="../../../sig-web/public/support/mat-1-2.jpg" alt="Bollplacering">
+      </div>
+      <div class="ball-info">
+        <h2>Bollplacering</h2>
+        <div class="ball-callout">
+          <div class="ball-callout-icon place">&#9971;</div>
+          <div>
+            <h3>I den markerade rutan</h3>
+            <p>Placera bollen i den svarta rutan som finns markerad på mattan</p>
+          </div>
+        </div>
+        <div class="ball-callout warn">
+          <div class="ball-callout-icon warn">&#9888;</div>
+          <div>
+            <h3>Endast EN boll</h3>
+            <p>Det får bara finnas en boll i det markerade området. Flera bollar eller andra
+               objekt och kameran kan inte mäta</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Getting started -->
+    <div class="slide slide-start" data-slide="2">
+      <h2>Kom igång</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Starta Practice</h3>
+          <p>Klicka <span class="highlight">Practice</span> och sedan <span class="highlight">Driving Range</span></p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Vänta på SLÅ</h3>
+          <p>Kontrollera att det står <span class="highlight">SLÅ</span> i den gröna rutan på skärmen</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Slå!</h3>
+          <p>Sikta parallellt med mattan som är riktad rakt mot duken</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Troubleshooting -->
+    <div class="slide slide-help" data-slide="3">
+      <h2>Om något inte fungerar</h2>
+      <div class="help-cards">
+        <div class="help-card">
+          <div class="help-card-icon restart">&#x1F504;</div>
+          <h3>Starta om datorn</h3>
+          <p>Tryck Windows-knappen och välj Starta om. Vänta tills GSPro-menyn visas igen.</p>
+        </div>
+        <div class="help-card">
+          <div class="help-card-icon contact">&#x2709;</div>
+          <h3>Byt bana</h3>
+          <p>Fungerar det fortfarande inte? Boka en annan bana och fortsätt spela där. Vi kompenserar dig.</p>
+          <span class="email">info@swedenindoorgolf.se</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide indicator -->
+    <div class="slide-dots" id="slide-dots"></div>
+  </div>
+
+  <!-- ===== STARTUP FOOTER ===== -->
+  <div class="startup-footer">
+    <div class="spinner">
+      <div class="spinner-ring"></div>
+    </div>
+    <div class="message-area">
+      <div class="message active" id="msg-current">
+        <div class="message-main">Systemet startar...</div>
+      </div>
+      <div class="message enter-below" id="msg-next">
+        <div class="message-main"></div>
+      </div>
+    </div>
+    <div class="progress-dots" id="progress-dots"></div>
+  </div>
+
+<script>
+  // ===== BAY DETECTION =====
+  // AHK passes bay ID via query param: ?bay=BAY03
+  // logicalBay 3 uses mat-3.jpg, all others use mat-1-2.jpg
+  const params = new URLSearchParams(window.location.search);
+  const bayId = params.get("bay") || "BAY01";
+  const logicalBay = parseInt(bayId.replace(/\D/g, ""), 10) || 1;
+
+  if (logicalBay === 3) {
+    document.getElementById("mat-image").src = "../../../sig-web/public/support/mat-3.jpg";
+  }
+
+  // AHK can also call this after load
+  window.setBayId = function(id) {
+    const num = parseInt(id.replace(/\D/g, ""), 10) || 1;
+    document.getElementById("mat-image").src = num === 3
+      ? "../../../sig-web/public/support/mat-3.jpg"
+      : "../../../sig-web/public/support/mat-1-2.jpg";
+  };
+
+  // ===== SLIDE ROTATION =====
+  const SLIDE_COUNT = 4;
+  const SLIDE_INTERVAL = 20000;
+  let currentSlide = 0;
+
+  const slides = document.querySelectorAll(".slide");
+  const slideDots = document.getElementById("slide-dots");
+
+  // Build slide dots
+  for (let i = 0; i < SLIDE_COUNT; i++) {
+    const d = document.createElement("div");
+    d.className = "sdot" + (i === 0 ? " active" : "");
+    slideDots.appendChild(d);
+  }
+
+  function showSlide(index) {
+    slides.forEach((s, i) => {
+      s.classList.remove("active", "exit");
+      if (i === currentSlide) s.classList.add("exit");
+    });
+    currentSlide = index;
+    slides[currentSlide].classList.remove("exit");
+    slides[currentSlide].classList.add("active");
+
+    slideDots.querySelectorAll(".sdot").forEach((d, i) => {
+      d.classList.toggle("active", i === currentSlide);
+    });
+
+    // Restart video when its slide is shown
+    if (currentSlide === 0) {
+      const vid = document.getElementById("start-video");
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    }
+  }
+
+  setInterval(() => {
+    showSlide((currentSlide + 1) % SLIDE_COUNT);
+  }, SLIDE_INTERVAL);
+
+  // ===== FOOTER MESSAGES =====
+  const informative = [
+    "Ansluter till launch monitor",
+    "Väntar på GSPro",
+    "Ansluter till lampor",
+    "Ansluten till launch monitor",
+  ];
+
+  const funny = [
+    "Plockar bollar på rangen",
+    "Klipper gräset",
+    "Krattar bunkrarna",
+    "Vattnar greenerna",
+    "Sätter ut nya pinnar",
+    "Räknar sandkorn i bunkern",
+    "Ber till golfgudarna",
+    "Mäter greenernas hastighet",
+    "Lagar nedslagsmärken",
+    "Byter sand i bunkrarna",
+    "Fixar torvor",
+    "Vässar hålkanterna",
+    "Polerar klubborna",
+    "Laddar golfbilarna",
+    "Fyller på bollautomaten",
+    "Tvättar golfbollarna",
+    "Jagar bort gässen från green",
+    "Letar efter borttappade bollar",
+    "Kollar vädret",
+    "Trimmar roughen",
+  ];
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildSequence() {
+    const shuffled = shuffle(funny);
+    const seq = ["Systemet startar..."];
+    let fi = 0, si = 0;
+    while (fi < informative.length || si < shuffled.length) {
+      if (si < shuffled.length) seq.push(shuffled[si++]);
+      if (si < shuffled.length) seq.push(shuffled[si++]);
+      if (fi < informative.length) seq.push(informative[fi++]);
+    }
+    seq.push("Snart redo!");
+    return seq;
+  }
+
+  const messages = buildSequence();
+  const TOTAL_DOTS = 8;
+  const MSG_INTERVAL = 5000;
+  let msgStep = 0;
+
+  const elCurrent = document.getElementById("msg-current");
+  const elNext = document.getElementById("msg-next");
+  const dotsContainer = document.getElementById("progress-dots");
+
+  for (let i = 0; i < TOTAL_DOTS; i++) {
+    const dot = document.createElement("div");
+    dot.className = "dot" + (i === 0 ? " active" : "");
+    dotsContainer.appendChild(dot);
+  }
+
+  function updateDots() {
+    const progress = Math.min(msgStep / (messages.length - 1), 1);
+    const activeDot = Math.round(progress * (TOTAL_DOTS - 1));
+    dotsContainer.querySelectorAll(".dot").forEach((dot, i) => {
+      dot.className = "dot";
+      if (i < activeDot) dot.classList.add("done");
+      if (i === activeDot) dot.classList.add("active");
+    });
+  }
+
+  let elA = elCurrent;
+  let elB = elNext;
+
+  function advanceMessage() {
+    msgStep++;
+    if (msgStep >= messages.length) msgStep = messages.length - 1;
+
+    elB.querySelector(".message-main").textContent = messages[msgStep];
+    elA.className = "message exit-up";
+    elB.className = "message active";
+    updateDots();
+
+    setTimeout(() => {
+      elA.className = "message enter-below";
+      const tmp = elA;
+      elA = elB;
+      elB = tmp;
+    }, 550);
+  }
+
+  setInterval(advanceMessage, MSG_INTERVAL);
+
+  window.setStartupMessage = function(text) {
+    elA.querySelector(".message-main").textContent = text;
+  };
+</script>
+
+</body>
+</html>

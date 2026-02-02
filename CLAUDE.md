@@ -10,7 +10,7 @@ SimGolf Facility Management System for **Sweden Indoor Golf** — manages 8 unma
 1. **Supervisor** (`C:\SimGolf\supervisor.ps1`) — lives outside the repo, auto-pulls every 30 min, restarts processes on changes
 2. **Repository** (`C:\SimGolf\sig-facility\`) — all scripts, configs, business logic; auto-updated via git
 
-**Configuration** merges `config/shared.json` (base) with `config/bays.json` (per-hostname overrides) via `lib/Config.ps1`. Bay identity is resolved from `$env:COMPUTERNAME`.
+**Configuration** merges `config/shared.json` (base) with `config/bays.json` (per-hostname overrides) via `lib/Config.ps1`. Bay identity is resolved from `C:\SimGolf\bay-identity.json` (contains `{"bayId": "BAY01"}`). The `bays.json` entry for each bay includes `logicalBay` (integer 1-8) which is the physical bay number.
 
 ## Key Technologies
 
@@ -100,4 +100,4 @@ WebView2-based HTML overlay for displaying content on top of GSPro.
 - AHK v2 scripts use `#Requires AutoHotkey v2.0`
 - The older `gspro-start.ahk` is AHK v1; `gspro-start-v2.ahk` is the active version
 - Do NOT add `Co-Authored-By` lines to commit messages
-- Never use non-ASCII characters in source files (no em dashes, curly quotes, etc.) - PowerShell 5 on the bays misreads UTF-8 multibyte characters. Use plain ASCII: hyphens (`-`), straight quotes (`"`/`'`), etc.
+- Never use non-ASCII characters in PowerShell (`.ps1`) or AutoHotkey (`.ahk`) scripts (no em dashes, curly quotes, etc.) - PowerShell 5 on the bays misreads UTF-8 multibyte characters. Use plain ASCII: hyphens (`-`), straight quotes (`"`/`'`), etc. HTML/CSS/JS files are fine with full UTF-8 (Swedish characters, etc.).
