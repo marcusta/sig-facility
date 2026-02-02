@@ -29,6 +29,7 @@ class HelpOverlay {
             ov.Show("", {w: A_ScreenWidth, h: A_ScreenHeight, x: 0, y: 0})
             ov.OnMessage(ObjBindMethod(this, "_onMessage"))
             url := this._overlayMgr.GetPagesDir() . "help.html"
+            MsgBox("DEBUG: " . url)
             ov.Navigate(url)
             this._overlay := ov
         } else {
