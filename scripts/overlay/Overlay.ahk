@@ -41,7 +41,7 @@ class Overlay {
         opacity := options.HasOwnProp("opacity") ? options.opacity : 0
 
         g := Gui("+AlwaysOnTop -Caption +ToolWindow")
-        g.BackColor := "0x000000"
+        g.BackColor := "0x0000FF"
         g.Show("w" w " h" h " x" x " y" y)
         if (opacity > 0 && opacity < 255)
             WinSetTransparent(opacity, g.Hwnd)
