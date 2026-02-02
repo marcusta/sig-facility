@@ -17,27 +17,29 @@ class HelpOverlay {
     }
 
     /**
+     * Pre-create the overlay (call during init, before any user interaction).
+     */
+    Init() {
+        if this._overlay
+            return
+        ov := Overlay()
+        ov.Show("", {w: A_ScreenWidth, h: A_ScreenHeight, x: 0, y: 0})
+        ov.OnMessage(ObjBindMethod(this, "_onMessage"))
+        url := this._overlayMgr.GetPagesDir() . "help.html"
+        ov.Navigate(url)
+        this._overlay := ov
+        ; Start hidden
+        ov.Hide()
+    }
+
+    /**
      * Show the help overlay.
      */
     Open() {
-        MsgBox("DEBUG Open: _open=" . this._open . " _overlay=" . Type(this._overlay))
         if this._open
             return
-
-        if !this._overlay {
-            ov := Overlay()
-            MsgBox("DEBUG: before Show")
-            ; Full screen overlay for backdrop effect
-            ov.Show("", {w: A_ScreenWidth, h: A_ScreenHeight, x: 0, y: 0})
-            MsgBox("DEBUG: after Show, wv=" . Type(ov.wv))
-            ov.OnMessage(ObjBindMethod(this, "_onMessage"))
-            url := this._overlayMgr.GetPagesDir() . "help.html"
-            MsgBox("DEBUG: navigating to " . url)
-            ov.Navigate(url)
-            this._overlay := ov
-        } else {
+        if this._overlay
             this._overlay.gui.Show()
-        }
         this._open := true
     }
 

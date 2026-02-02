@@ -33,6 +33,7 @@ class OverlayManager {
 
         this._startup := StartupOverlay(this)
         this._helpOv := HelpOverlay(this)
+        this._helpOv.Init()
         this._helpBtn := HelpButton(this, ObjBindMethod(this, "_onHelpClick"))
     }
 

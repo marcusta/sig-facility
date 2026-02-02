@@ -41,7 +41,7 @@ class Overlay {
         opacity := options.HasOwnProp("opacity") ? options.opacity : 0
 
         g := Gui("+AlwaysOnTop -Caption +ToolWindow")
-        g.BackColor := "0x0000FF"
+        g.BackColor := "0x000000"
         g.Show("w" w " h" h " x" x " y" y)
         if (opacity > 0 && opacity < 255)
             WinSetTransparent(opacity, g.Hwnd)
@@ -85,13 +85,13 @@ class Overlay {
     }
 
     _onWebMsg(p1, p2, p3 := 0) {
-        MsgBox("DEBUG _onWebMsg: p1=" . Type(p1) . " p2=" . Type(p2) . " p3=" . Type(p3))
-        argsPtr := p3 ? p3 : p2
-        args := WebView2.WebMessageReceivedEventArgs(argsPtr)
-        msg := args.TryGetWebMessageAsString()
-        MsgBox("DEBUG msg: " . msg)
-        if this._msgCallback
-            this._msgCallback.Call(msg)
+        try {
+            argsPtr := p3 ? p3 : p2
+            args := WebView2.WebMessageReceivedEventArgs(argsPtr)
+            msg := args.TryGetWebMessageAsString()
+            if this._msgCallback
+                this._msgCallback.Call(msg)
+        }
     }
 
     /**
