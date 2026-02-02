@@ -79,9 +79,16 @@ class Overlay {
         }
     }
 
-    _onWebMsg(_wv, args, _extra := "") {
-        if this._msgCallback
-            this._msgCallback.Call(args.TryGetWebMessageAsString())
+    _onWebMsg(p1, p2, p3 := 0) {
+        try {
+            ; WebView2.Handler CallbackCreate passes raw pointers: (this, sender, args)
+            ; With ObjBindMethod, we receive (sender_ptr, args_ptr)
+            argsPtr := p3 ? p3 : p2
+            args := WebView2.WebMessageReceivedEventArgs(argsPtr)
+            msg := args.TryGetWebMessageAsString()
+            if this._msgCallback
+                this._msgCallback.Call(msg)
+        }
     }
 
     /**
