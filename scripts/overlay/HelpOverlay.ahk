@@ -26,11 +26,13 @@ class HelpOverlay {
 
         if !this._overlay {
             ov := Overlay()
+            MsgBox("DEBUG: before Show")
             ; Full screen overlay for backdrop effect
             ov.Show("", {w: A_ScreenWidth, h: A_ScreenHeight, x: 0, y: 0})
+            MsgBox("DEBUG: after Show, wv=" . Type(ov.wv))
             ov.OnMessage(ObjBindMethod(this, "_onMessage"))
             url := this._overlayMgr.GetPagesDir() . "help.html"
-            MsgBox("DEBUG: " . url)
+            MsgBox("DEBUG: navigating to " . url)
             ov.Navigate(url)
             this._overlay := ov
         } else {
