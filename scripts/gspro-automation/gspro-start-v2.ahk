@@ -254,14 +254,24 @@ InitializeSystem() {
 }
 
 global startupComplete := false
+global startupStableSince := 0
 CheckStartupComplete() {
-    global startupComplete
+    global startupComplete, startupStableSince
     if startupComplete
         return
-    if !SystemState.connectionStable || !SystemState.linkStable
+    if !SystemState.connectionStable || !SystemState.linkStable {
+        startupStableSince := 0
+        return
+    }
+    ; Require 5 seconds of sustained stability before dismissing
+    if (startupStableSince = 0) {
+        startupStableSince := A_TickCount
+        return
+    }
+    if (A_TickCount - startupStableSince < 5000)
         return
     startupComplete := true
-    LogStatus("System fully connected - finishing startup")
+    LogStatus("System fully stable - finishing startup")
     if OverlayMgr
         OverlayMgr.HideStartup()
     SetTimer(OpenVisualDataAndSetup, -500)
@@ -360,6 +370,10 @@ SignalSampleTick() {
     SampleLinkBar(hwnd)
     SampleConnection(hwnd)
     SampleBallTracking(hwnd)
+
+    ; Check if startup is complete (needs repeated calls for stability timer)
+    if !startupComplete
+        CheckStartupComplete()
 
     ; Update indicator mode based on current state
     UpdateIndicatorMode()
