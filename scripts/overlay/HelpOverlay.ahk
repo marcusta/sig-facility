@@ -28,8 +28,6 @@ class HelpOverlay {
             ; Full screen overlay for backdrop effect
             ov.Show("", {w: A_ScreenWidth, h: A_ScreenHeight, x: 0, y: 0})
             ov.OnMessage(ObjBindMethod(this, "_onMessage"))
-            ; Make WebView2 background transparent (ARGB 0 = fully transparent)
-            try ov.wvc.DefaultBackgroundColor := 0
             url := this._overlayMgr.GetPagesDir() . "help.html"
             ov.Navigate(url)
             this._overlay := ov
