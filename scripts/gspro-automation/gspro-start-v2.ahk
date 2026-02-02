@@ -153,8 +153,10 @@ CollapseDebugOverlay() {
     DebugGui.Show("x10 y" . debugY . " w16 h16 NoActivate")
 }
 
+global LOG_FILE := "C:\SimGolf\gspro-debug.log"
+
 LogStatus(msg, expand := true) {
-    global DebugText, debugCollapseTimer
+    global DebugText, debugCollapseTimer, LOG_FILE
 
     ; Only expand overlay for important messages
     if (expand) {
@@ -162,12 +164,15 @@ LogStatus(msg, expand := true) {
         debugCollapseTimer := A_TickCount
     }
 
+    logLine := FormatTime(, "HH:mm:ss") . ": " . msg
+    try FileAppend(logLine . "`n", LOG_FILE)
+
     try {
         current := DebugText.Value
         lines := StrSplit(current, "`n")
         if (lines.Length >= 6)
             lines.RemoveAt(1)
-        lines.Push(FormatTime(, "HH:mm:ss") . ": " . msg)
+        lines.Push(logLine)
         DebugText.Value := ""
         for line in lines
             DebugText.Value .= (A_Index > 1 ? "`n" : "") . line
@@ -608,8 +613,8 @@ BlinkEngineTick() {
 ; ##################################################################
 
 UIEnforcementTick() {
-    ; Don't enforce UI during restart or recovery - connector needs to stay in front
-    if (SystemState.isRestarting || SystemState.isRecovering)
+    ; Don't enforce UI during restart, recovery, or startup
+    if (SystemState.isRestarting || SystemState.isRecovering || !startupComplete)
         return
 
     EnsureFullscreen(GAME_WINDOW)
