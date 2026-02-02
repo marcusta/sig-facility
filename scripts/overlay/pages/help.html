@@ -52,7 +52,7 @@
         position: relative;
         z-index: 1;
         width: 1700px;
-        height: 1000px;
+        height: 1100px;
         background: var(--bg);
         border-radius: 16px;
         border: 1px solid var(--border);
@@ -258,15 +258,19 @@
         padding: 2rem 2.5rem;
         z-index: 2;
         position: relative;
+        display: flex;
+        flex-direction: column;
       }
 
       .section {
         display: none;
         animation: fadeIn 0.2s ease;
+        height: 100%;
       }
 
       .section.active {
-        display: block;
+        display: flex;
+        flex-direction: column;
       }
 
       @keyframes fadeIn {
@@ -743,7 +747,8 @@
         display: grid;
         grid-template-columns: 1fr 1fr 1.1fr;
         gap: 1.25rem;
-        height: calc(100vh - 56px - 6rem - 4.5rem);
+        flex: 1;
+        min-height: 0;
       }
 
       .ball-media-video {
