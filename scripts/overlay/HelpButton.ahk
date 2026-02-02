@@ -27,7 +27,7 @@ class HelpButton {
             return
 
         ov := Overlay()
-        ov.Show("", {w: 40, h: 40, x: 0, y: 1138, opacity: 230})
+        ov.Show("", {w: 40, h: 40, x: 0, y: 1145, opacity: 230})
         ov.OnMessage(ObjBindMethod(this, "_onMessage"))
         url := this._overlayMgr.GetPagesDir() . "help-button.html"
         ov.Navigate(url)
