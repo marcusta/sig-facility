@@ -270,7 +270,7 @@ InitializeSystem() {
         }
 
         try {
-            ControlClick("Open Visual Data", CONNECTOR_WINDOW)
+            ControlClick("Open Visual Data", CONNECTOR_WINDOW, , "Left", 1, "NA")
             LogStatus("Clicked Open Visual Data (" . A_Index . ")")
         } catch as e {
             LogStatus("Click failed: " . e.Message)
