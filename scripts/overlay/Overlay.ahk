@@ -79,7 +79,7 @@ class Overlay {
         }
     }
 
-    _onWebMsg(_wv, args) {
+    _onWebMsg(_wv, args, _extra := "") {
         if this._msgCallback
             this._msgCallback.Call(args.TryGetWebMessageAsString())
     }
