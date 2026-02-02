@@ -154,6 +154,13 @@ CollapseDebugOverlay() {
 }
 
 global LOG_FILE := "C:\SimGolf\gspro-debug.log"
+; Rotate log on startup: keep previous as .prev, start fresh
+try {
+    if FileExist(LOG_FILE . ".prev")
+        FileDelete(LOG_FILE . ".prev")
+    if FileExist(LOG_FILE)
+        FileMove(LOG_FILE, LOG_FILE . ".prev")
+}
 
 LogStatus(msg, expand := true) {
     global DebugText, debugCollapseTimer, LOG_FILE
@@ -979,12 +986,9 @@ SetWindowHierarchy() {
     }
 
     ; Bring game window to front
-    LogStatus("Hierarchy: activating game...", false)
     try WinActivate(GAME_WINDOW)
-    LogStatus("Hierarchy: game activated", false)
     Sleep(100)
     try WinMoveTop(GAME_WINDOW)
-    LogStatus("Hierarchy: game on top", false)
 
     ; Overlay should be always on top
     if WinExist(REPLICA_WINDOW)
