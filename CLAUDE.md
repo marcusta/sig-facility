@@ -68,7 +68,7 @@ scripts/
 
 WebView2-based HTML overlay for displaying content on top of GSPro.
 
-**Status:** Phase 0+1 complete (foundation verified on bay). Next: content and layout.
+**Status:** Phase 0+1 complete (foundation verified on bay). Startup overlay content built. Next: help system page (Phase 5 in roadmap).
 
 **Structure:**
 - `lib/ahk/WebView2/` — thqby's WebView2.ahk library + 64-bit loader DLL
@@ -78,6 +78,21 @@ WebView2-based HTML overlay for displaying content on top of GSPro.
 - `scripts/overlay/pages/` — HTML content pages
 - `scripts/overlay-dev.ahk` — standalone dev harness (runs without GSPro)
   - `Ctrl+Shift+R` reload, `Ctrl+Shift+1/2/3` switch pages, `Escape` exit
+
+**Existing pages:**
+- `scripts/overlay/pages/startup.html` — shown during GSPro boot sequence
+  - Top 75%: 4 auto-rotating slides (20s each): instruction video (sig-start.mp4 autoplay), ball placement with bay-specific mat image, "Kom igang" 3-step guide, troubleshooting
+  - Bottom 25%: loading footer with spinner, rotating status messages (mix of funny golf-themed and informative), progress dots
+  - Topbar with SIG logo and brand text
+  - Golden radial gradient background from top-right corner
+  - Bay detection via `?bay=BAY03` query param or `window.setBayId("BAY03")` JS bridge call (bay 3 gets mat-3.jpg, others get mat-1-2.jpg)
+  - Assets referenced from `sig-web/public/support/` (video, mat images)
+
+**Design system (shared across overlay pages):**
+- Brand colors: `--primary: #eab308` (yellow), `--bg: #020617` (slate-950), `--bg-secondary: #0f172a` (slate-900)
+- Font: Inter (Google Fonts), weights 400/500/600/700
+- Style matches the sig-web Next.js site: dark theme, yellow accents, rounded corners, clean typography
+- Content in Swedish with proper UTF-8 characters
 
 **AHK v2 gotcha:** AHK is case-insensitive. Do not use variable names that match class names (e.g. `overlay := Overlay()` fails).
 
