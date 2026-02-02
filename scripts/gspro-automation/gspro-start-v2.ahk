@@ -259,6 +259,7 @@ InitializeSystem() {
 }
 
 global startupComplete := false
+global setupComplete := false
 global startupStableSince := 0
 CheckStartupComplete() {
     global startupComplete, startupStableSince
@@ -345,6 +346,7 @@ OpenVisualDataAndSetup() {
     LogStatus("Setting window hierarchy...")
     SetWindowHierarchy()
     LogStatus("Window hierarchy set")
+    global setupComplete := true
     LogStatus("System Ready")
 }
 
@@ -629,7 +631,7 @@ BlinkEngineTick() {
 
 UIEnforcementTick() {
     ; Don't enforce UI during restart, recovery, or startup
-    if (SystemState.isRestarting || SystemState.isRecovering || !startupComplete)
+    if (SystemState.isRestarting || SystemState.isRecovering || !setupComplete)
         return
 
     EnsureFullscreen(GAME_WINDOW)
