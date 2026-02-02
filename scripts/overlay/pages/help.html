@@ -1,0 +1,1680 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sweden Indoor Golf - Hjälp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #eab308;
+        --bg: #020617;
+        --bg-secondary: #0f172a;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #1e293b;
+        --red: #ef4444;
+        --red-dim: rgba(239, 68, 68, 0.15);
+        --green: #22c55e;
+      }
+
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ========== TOPBAR ========== */
+      .topbar {
+        height: 56px;
+        background: linear-gradient(
+          90deg,
+          var(--bg-secondary) 0%,
+          rgba(234, 179, 8, 0.04) 50%,
+          var(--bg-secondary) 100%
+        );
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 1.5rem;
+        flex-shrink: 0;
+        z-index: 20;
+        position: relative;
+      }
+
+      .topbar::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 20%,
+          rgba(234, 179, 8, 0.25),
+          transparent 80%
+        );
+      }
+
+      .topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .topbar-brand img {
+        height: 32px;
+        width: auto;
+      }
+
+      .topbar-brand span {
+        font-size: 1.125rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        color: var(--text-primary);
+      }
+
+      .topbar-brand .accent {
+        color: var(--primary);
+      }
+
+      .topbar-title {
+        margin-left: auto;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      /* ========== LAYOUT ========== */
+      .layout {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .golden-gradient {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at top right,
+          rgba(234, 179, 8, 0.15) 0%,
+          rgba(234, 179, 8, 0.05) 35%,
+          transparent 70%
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* ========== SIDEBAR ========== */
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        background: var(--bg-secondary);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 1.25rem 0.75rem;
+        gap: 0.25rem;
+        overflow-y: auto;
+        z-index: 2;
+      }
+
+      .sidebar-group-label {
+        font-size: 0.825rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        padding: 0.75rem 0.75rem 0.375rem;
+      }
+
+      .sidebar-group-label:first-child {
+        padding-top: 0;
+      }
+
+      .nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.625rem 0.75rem;
+        border-radius: 10px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-family: inherit;
+        font-size: 0.975rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        width: 100%;
+        text-align: left;
+      }
+
+      .nav-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+      }
+
+      .nav-btn.active {
+        background: var(--primary);
+        color: var(--bg);
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
+      }
+
+      .nav-btn.danger {
+        color: #fca5a5;
+      }
+
+      .nav-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #fca5a5;
+      }
+
+      .nav-btn.danger.active {
+        background: var(--red);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+      }
+
+      .nav-icon {
+        font-size: 1.2rem;
+        width: 1.25rem;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      /* ========== MAIN CONTENT ========== */
+      .main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem 2.5rem;
+        z-index: 2;
+        position: relative;
+      }
+
+      .section {
+        display: none;
+        animation: fadeIn 0.2s ease;
+      }
+
+      .section.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .section-title {
+        font-size: 2.1rem;
+        font-weight: 700;
+        margin-bottom: 0.375rem;
+      }
+
+      .section-subtitle {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.75rem;
+      }
+
+      /* ========== STEP LIST ========== */
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .step {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .step-num {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(234, 179, 8, 0.15);
+        border: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+
+      .step-content h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.125rem;
+      }
+
+      .step-content p {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      .highlight {
+        display: inline;
+        background: rgba(234, 179, 8, 0.15);
+        color: var(--primary);
+        font-weight: 700;
+        padding: 0.0625rem 0.375rem;
+        border-radius: 4px;
+      }
+
+      .highlight-green {
+        display: inline;
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--green);
+        font-weight: 700;
+        padding: 0.0625rem 0.375rem;
+        border-radius: 4px;
+      }
+
+      /* ========== SECTION LINK ========== */
+      .section-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(234, 179, 8, 0.3);
+        padding-bottom: 1px;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+
+      .section-link:hover {
+        border-bottom-color: var(--primary);
+      }
+
+      .section-link::after {
+        content: "\2192";
+        font-size: 0.85em;
+      }
+
+      /* ========== INDICATOR IMAGE ========== */
+      .indicator-img {
+        display: block;
+        margin-top: 0.75rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        max-height: 90px;
+        width: auto;
+      }
+
+      /* ========== CARD GRID ========== */
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+
+      .card h3 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 0.375rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .card p,
+      .card li {
+        font-size: 0.975rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+      }
+
+      .card ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .card li {
+        padding: 0.125rem 0;
+      }
+
+      .card li::before {
+        content: "\2022";
+        color: var(--primary);
+        font-weight: 700;
+        margin-right: 0.5rem;
+      }
+
+      /* ========== SHORTCUT TABLE ========== */
+      .shortcut-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .shortcut-group:last-child {
+        margin-bottom: 0;
+      }
+
+      .shortcut-group-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+      }
+
+      .shortcut-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .shortcut-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.625rem 0.875rem;
+      }
+
+      kbd {
+        display: inline-block;
+        min-width: 40px;
+        text-align: center;
+        padding: 0.25rem 0.5rem;
+        background: rgba(234, 179, 8, 0.1);
+        border: 1px solid rgba(234, 179, 8, 0.25);
+        border-radius: 6px;
+        color: var(--primary);
+        font-family: "Inter", monospace;
+        font-size: 0.9rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .shortcut-item span {
+        font-size: 0.975rem;
+        color: var(--text-secondary);
+      }
+
+      /* ========== INFO BOX ========== */
+      .info-box {
+        background: rgba(234, 179, 8, 0.06);
+        border: 1px solid rgba(234, 179, 8, 0.2);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.975rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+      }
+
+      .info-box strong {
+        color: var(--primary);
+      }
+
+      .warning-box {
+        background: rgba(239, 68, 68, 0.06);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.975rem;
+        color: #fca5a5;
+        line-height: 1.55;
+      }
+
+      .warning-box strong {
+        color: var(--red);
+      }
+
+      /* ========== TOURNAMENT STEPS ========== */
+      .tournament-block {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .tournament-block h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+      }
+
+      .tournament-block ol {
+        padding-left: 1.25rem;
+        font-size: 0.975rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+
+      .tournament-block ol li {
+        padding: 0.125rem 0;
+      }
+
+      /* ========== TROUBLESHOOTING ========== */
+      .trouble-step {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .trouble-step:last-child {
+        border-bottom: none;
+      }
+
+      .trouble-num {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--red-dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--red);
+        flex-shrink: 0;
+      }
+
+      .trouble-text {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .trouble-text strong {
+        color: var(--text-primary);
+      }
+
+      /* ========== CONTACT ========== */
+      .contact-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .contact-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: rgba(234, 179, 8, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .contact-card .label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .contact-card .value {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      /* ========== CLUB MARKER IMAGES ========== */
+      .marker-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .marker-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .marker-card img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .marker-card .marker-label {
+        padding: 0.75rem;
+        font-size: 0.975rem;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      /* Subsection headings inside sections */
+      .sub-heading {
+        font-size: 1.275rem;
+        font-weight: 700;
+        margin: 1.75rem 0 0.75rem;
+      }
+
+      .sub-heading:first-of-type {
+        margin-top: 0;
+      }
+
+      /* ========== FLOW CARDS (Spela en runda) ========== */
+      .flow-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+
+      .flow-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.5rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .flow-card-num {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(234, 179, 8, 0.15);
+        border: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .flow-card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .flow-card p {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+      }
+
+      .flow-card .tag {
+        display: inline-block;
+        background: rgba(234, 179, 8, 0.15);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 5px;
+      }
+
+      .flow-card.wide {
+        grid-column: span 2;
+      }
+
+      .flow-card-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+        margin-top: 0.25rem;
+      }
+
+      .flow-card-details .detail-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: baseline;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.45;
+      }
+
+      .flow-card-details .detail-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .flow-card-highlight {
+        background: rgba(234, 179, 8, 0.06);
+        border-color: rgba(234, 179, 8, 0.3);
+      }
+
+      /* ========== BALL PLACEMENT SECTION ========== */
+      .ball-section-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.1fr;
+        gap: 1.25rem;
+        height: calc(100vh - 56px - 6rem - 4.5rem);
+      }
+
+      .ball-media-video {
+        min-height: 0;
+        display: flex;
+      }
+
+      .ball-media-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #000;
+      }
+
+      .ball-media-img {
+        min-height: 0;
+        display: flex;
+      }
+
+      .ball-media-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .ball-rules {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.25rem;
+      }
+
+      .ball-rule {
+        display: flex;
+        gap: 0.875rem;
+        align-items: flex-start;
+      }
+
+      .ball-rule-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.35rem;
+      }
+
+      .ball-rule-icon.place {
+        background: rgba(234, 179, 8, 0.15);
+      }
+
+      .ball-rule-icon.warn {
+        background: rgba(239, 68, 68, 0.15);
+      }
+
+      .ball-rule h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.125rem;
+      }
+
+      .ball-rule p {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      .ball-rule.warn h3 {
+        color: #f87171;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== TOPBAR ===== -->
+    <div class="topbar">
+      <div class="topbar-brand">
+        <img src="../../../sig-web/public/logo.png" alt="Sweden Indoor Golf" />
+        <span>SWEDEN <span class="accent">INDOOR GOLF</span></span>
+      </div>
+      <div class="topbar-title">Hj&#228;lpcenter</div>
+    </div>
+
+    <!-- ===== LAYOUT ===== -->
+    <div class="layout">
+      <div class="golden-gradient"></div>
+
+      <!-- Sidebar -->
+      <nav class="sidebar">
+        <div class="sidebar-group-label">Nybörjare</div>
+        <button class="nav-btn active" data-section="getting-started">
+          <span class="nav-icon">&#9971;</span> Kom ig&#229;ng
+        </button>
+        <button class="nav-btn" data-section="ball-placement">
+          <span class="nav-icon">&#9898;</span> Bollplacering
+        </button>
+        <button class="nav-btn" data-section="play-round">
+          <span class="nav-icon">&#127948;</span> Spela en runda
+        </button>
+
+        <div class="sidebar-group-label">Referens</div>
+        <button class="nav-btn" data-section="shortcuts">
+          <span class="nav-icon">&#9000;</span> Genv&#228;gar
+        </button>
+        <button class="nav-btn" data-section="tips">
+          <span class="nav-icon">&#128161;</span> Speltips
+        </button>
+
+        <div class="sidebar-group-label">T&#228;vlingar</div>
+        <button class="nav-btn" data-section="tournament-register">
+          <span class="nav-icon">&#9997;</span> Registrera dig
+        </button>
+        <button class="nav-btn" data-section="tournament-play">
+          <span class="nav-icon">&#127942;</span> Spela t&#228;vling
+        </button>
+
+        <div class="sidebar-group-label">&#214;vrigt</div>
+        <button class="nav-btn" data-section="club-markers">
+          <span class="nav-icon">&#128204;</span> Club Markers
+        </button>
+        <button class="nav-btn danger" data-section="troubleshooting">
+          <span class="nav-icon">&#9888;</span> F&#246;rsta hj&#228;lpen
+        </button>
+        <button class="nav-btn" data-section="contact">
+          <span class="nav-icon">&#9993;</span> Kontakt
+        </button>
+      </nav>
+
+      <!-- Main content -->
+      <div class="main">
+        <!-- ==================== KOM IGÅNG ==================== -->
+        <div class="section active" id="getting-started">
+          <h2 class="section-title">Kom ig&#229;ng</h2>
+          <p class="section-subtitle">
+            F&#246;rsta g&#229;ngen? F&#246;lj dessa steg f&#246;r att
+            b&#246;rja spela.
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h3>Starta Practice</h3>
+                <p>
+                  Klicka <span class="highlight">Practice</span> och sedan
+                  <span class="highlight">Driving Range</span> p&#229;
+                  sk&#228;rmen.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h3>Placera bollen</h3>
+                <p>
+                  L&#228;gg bollen i den svarta rutan p&#229; mattan. Se
+                  <a
+                    class="section-link"
+                    onclick="window.showSection('ball-placement')"
+                    >Bollplacering</a
+                  >
+                  f&#246;r detaljer.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h3>V&#228;nta p&#229; gr&#246;nt</h3>
+                <p>
+                  N&#228;r
+                  <span class="highlight-green"
+                    >pilarna p&#229; sk&#228;rmen</span
+                  >
+                  (l&#228;ngst ner) lyser gr&#246;nt ser systemet bollen -
+                  d&#229; &#228;r det klart att sl&#229;!<br />
+                  <span style="color: var(--text-muted)"
+                    >Den gr&#246;na lampan i b&#229;set &#228;r ytterligare en
+                    indikator.</span
+                  >
+                </p>
+                <img
+                  class="indicator-img"
+                  src="../../../sig-web/public/support/chevrons-green.jpg"
+                  alt="Gr&#246;na pilar p&#229; sk&#228;rmen"
+                />
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <h3>Sikta och sl&#229;</h3>
+                <p>
+                  Sikta <strong>parallellt med mattan</strong> som &#228;r
+                  riktad rakt mot duken.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box" style="margin-top: 1.5rem">
+            <strong>Tips:</strong> Anv&#228;nd alltid en ny, omarkerad
+            <strong>vit boll</strong> och rena skor f&#246;r inomhusgolf. Du
+            beh&#246;ver simulatorpeggar som finns att k&#246;pa i kiosken.
+          </div>
+        </div>
+
+        <!-- ==================== BOLLPLACERING ==================== -->
+        <div class="section" id="ball-placement">
+          <h2 class="section-title">Bollplacering</h2>
+          <p class="section-subtitle">
+            S&#229; h&#228;r l&#228;gger du bollen r&#228;tt p&#229; mattan.
+          </p>
+
+          <div class="ball-section-layout">
+            <div class="ball-media-video">
+              <video autoplay muted loop playsinline>
+                <source
+                  src="../../../sig-web/public/support/sig-start.mp4"
+                  type="video/mp4"
+                />
+              </video>
+            </div>
+            <div class="ball-media-img">
+              <img
+                id="mat-image"
+                src="../../../sig-web/public/support/mat-1-2.jpg"
+                alt="Bollplacering p&#229; mattan"
+              />
+            </div>
+            <div class="ball-rules">
+              <div class="ball-rule">
+                <div class="ball-rule-icon place">&#9971;</div>
+                <div>
+                  <h3>I den svarta rutan</h3>
+                  <p>
+                    Placera bollen i den svarta rutan som finns markerad p&#229;
+                    mattan.
+                  </p>
+                </div>
+              </div>
+              <div class="ball-rule warn">
+                <div class="ball-rule-icon warn">&#9888;</div>
+                <div>
+                  <h3>Endast EN boll</h3>
+                  <p>
+                    Det f&#229;r bara finnas en boll i det markerade
+                    omr&#229;det. Flera bollar eller andra f&#246;rem&#229;l
+                    g&#246;r att kameran inte kan m&#228;ta.
+                  </p>
+                </div>
+              </div>
+              <div class="ball-rule">
+                <div class="ball-rule-icon place">&#128065;</div>
+                <div>
+                  <h3>Kontrollera pilarna</h3>
+                  <p>
+                    N&#228;r bollen ligger r&#228;tt lyser
+                    <span class="highlight-green"
+                      >pilarna p&#229; sk&#228;rmen</span
+                    >
+                    gr&#246;nt - d&#229; &#228;r det klart att sl&#229;. Den
+                    gr&#246;na lampan i b&#229;set &#228;r ytterligare en
+                    indikator.
+                  </p>
+                </div>
+              </div>
+              <div class="ball-rule warn">
+                <div class="ball-rule-icon warn">&#128683;</div>
+                <div>
+                  <h3>Undvik vita rutan</h3>
+                  <p>
+                    St&#229; inte i den vita rutan med vita skor - det kan
+                    st&#246;ra kamerans vitbalans. (G&#228;ller matta 1-2 och
+                    4-8.)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SPELA EN RUNDA ==================== -->
+        <div class="section" id="play-round">
+          <h2 class="section-title">Spela en runda</h2>
+          <p class="section-subtitle">
+            Fr&#229;n huvudmenyn till f&#246;rsta h&#229;let i fem steg.
+          </p>
+
+          <div class="flow-grid">
+            <div class="flow-card">
+              <div class="flow-card-num">1</div>
+              <h3><span class="tag">Local Match</span></h3>
+              <p>
+                Klicka p&#229; Local Match i huvudmenyn f&#246;r att starta en
+                runda med spelare p&#229; plats.
+              </p>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-card-num">2</div>
+              <h3>V&#228;lj bana</h3>
+              <p>
+                &#214;ver 2000 banor att v&#228;lja mellan. Anv&#228;nd
+                s&#246;kf&#228;ltet eller filtrera efter favoriter.
+              </p>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-card-num">3</div>
+              <h3>V&#228;lj spelare</h3>
+              <p>
+                L&#228;gg till med <strong>+</strong>, ta bort med
+                <strong>X</strong>. Max 8 spelare. V&#228;lj h&#246;ger- eller
+                v&#228;nsterh&#228;nt.
+              </p>
+              <p
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.85rem;
+                  font-style: italic;
+                "
+              >
+                Bana 3: h&#228;nthet extra viktigt.
+              </p>
+            </div>
+
+            <div class="flow-card wide flow-card-highlight">
+              <div class="flow-card-num">4</div>
+              <h3>Match Settings</h3>
+              <div class="flow-card-details">
+                <div class="detail-row">
+                  <span class="detail-label">Tee:</span> V&#228;lj baserat
+                  p&#229; &#246;nskad sv&#229;righetsgrad och l&#228;ngd.
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Puttning:</span> Auto-putt, Gimme
+                  circle, eller manuell putt.
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Mulligans:</span>
+                  <strong style="color: var(--primary)"
+                    >Sl&#229; p&#229; detta!</strong
+                  >
+                  Ta om slag med <kbd>Ctrl+M</kbd>.
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">V&#228;der:</span> Vindstyrka,
+                  fairway-h&#229;rdhet, green-hastighet (Stimp).
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flow-card"
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+              "
+            >
+              <div class="flow-card-num" style="margin: 0 auto 0.5rem">5</div>
+              <h3>
+                <span class="tag" style="font-size: 1.1rem">Start Game</span>
+              </h3>
+              <p>Klicka och ni &#228;r ig&#229;ng!</p>
+            </div>
+          </div>
+
+          <div class="info-box" style="margin-top: 1.5rem">
+            <strong>Under spel:</strong> En stj&#228;rna (*) bredvid ett namn i
+            spelarlistan betyder att spelaren redan har slagit. Klicka p&#229;
+            valfritt namn f&#246;r att hoppa till den spelarens tur.
+          </div>
+        </div>
+
+        <!-- ==================== GENVÄGAR ==================== -->
+        <div class="section" id="shortcuts">
+          <h2 class="section-title">Genv&#228;gar</h2>
+          <p class="section-subtitle">Tangentbordskommandon under spel.</p>
+
+          <div class="info-box">
+            <strong>TAB</strong> visar en fullst&#228;ndig lista &#246;ver alla
+            genv&#228;gar direkt p&#229; sk&#228;rmen.
+          </div>
+
+          <div class="shortcut-group">
+            <div class="shortcut-group-title">Sikta &amp; Kamera</div>
+            <div class="shortcut-grid">
+              <div class="shortcut-item">
+                <kbd>A</kbd
+                ><span
+                  >&#197;terst&#228;ll siktet mot rekommenderat m&#229;l</span
+                >
+              </div>
+              <div class="shortcut-item">
+                <kbd>J</kbd
+                ><span
+                  >Siktl&#228;ge - hoppa till landningsomr&#229;det, finjustera
+                  med h&#229;rkors</span
+                >
+              </div>
+              <div class="shortcut-item">
+                <kbd>R</kbd><span>Range Finder (avst&#229;ndsm&#228;tare)</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>F3</kbd
+                ><span>V&#228;xla kamera: boll / siktpunkt / h&#229;let</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>F5</kbd
+                ><span>Free Look - flyg fritt (W/A/S/D + h&#246;gerklick)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shortcut-group">
+            <div class="shortcut-group-title">Minikartan</div>
+            <div class="shortcut-grid">
+              <div class="shortcut-item"><kbd>Q</kbd><span>Zooma in</span></div>
+              <div class="shortcut-item"><kbd>W</kbd><span>Zooma ut</span></div>
+              <div class="shortcut-item">
+                <kbd>S</kbd><span>&#196;ndra storlek p&#229; kartan</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Y</kbd
+                ><span>H&#246;jdkurvor / heatmap p&#229; greenen</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shortcut-group">
+            <div class="shortcut-group-title">&#214;vrigt</div>
+            <div class="shortcut-grid">
+              <div class="shortcut-item">
+                <kbd>Ctrl+M</kbd
+                ><span>Mulligan (ta om slag, om aktiverat)</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>TAB</kbd
+                ><span>Visa alla genv&#228;gar p&#229; sk&#228;rmen</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SPELTIPS ==================== -->
+        <div class="section" id="tips">
+          <h2 class="section-title">Speltips</h2>
+          <p class="section-subtitle">
+            Snabbreferens f&#246;r vanliga spelsituationer.
+          </p>
+
+          <div class="card-grid">
+            <div class="card">
+              <h3>&#127919; Siktl&#228;ge (J)</h3>
+              <p>
+                Hoppar kameran till landningsomr&#229;det eller flaggan.
+                Finjustera siktet med h&#229;rkors. Perfekt f&#246;r
+                approach-slag d&#228;r du inte ser greenen.
+              </p>
+            </div>
+
+            <div class="card">
+              <h3>&#127963; Green Heatmap (Y)</h3>
+              <p>
+                Visar h&#246;jdkurvor p&#229; greenen med f&#228;rgkarta.
+                Anv&#228;nd f&#246;r att l&#228;sa lutning innan putt. Siktet
+                justeras med musen eller piltangenterna.
+              </p>
+            </div>
+
+            <div class="card">
+              <h3>&#9971; Puttning</h3>
+              <p>
+                Tre alternativ: putta IRL p&#229; puttytan, auto-putt (datorn
+                ber&#228;knar), eller manuell putt p&#229; simulatorn. Stimp
+                &#228;r snabbare &#228;n vanliga svenska greener.
+              </p>
+            </div>
+
+            <div class="card">
+              <h3>&#127968; Lie &amp; P&#229;verkan</h3>
+              <p>
+                Information om bollens l&#228;ge finns l&#228;ngst ner p&#229;
+                minikartan.
+              </p>
+              <ul>
+                <li>
+                  <strong>Uppf&#246;r/Nedf&#246;r:</strong> P&#229;verkar
+                  h&#246;jd och l&#228;ngd
+                </li>
+                <li>
+                  <strong>Sidolutning:</strong> "Left" = bollen under
+                  f&#246;tterna, tendens &#229;t v&#228;nster
+                </li>
+                <li>
+                  <strong>Rough:</strong> Reducerad spinn och avst&#229;nd
+                </li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>&#128207; Range Finder (R)</h3>
+              <p>
+                &#214;ppnar avst&#229;ndsm&#228;taren. Visar exakt avst&#229;nd
+                till flagga och andra punkter p&#229; banan.
+              </p>
+            </div>
+
+            <div class="card">
+              <h3>&#128065; Free Look (F5)</h3>
+              <p>
+                Flyg fritt &#246;ver banan med W/A/S/D + h&#246;gerklick. Bra
+                f&#246;r att scouta blindslag och studera banlayouten.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TÄVLINGAR: REGISTRERA DIG ==================== -->
+        <div class="section" id="tournament-register">
+          <h2 class="section-title">Registrera dig f&#246;r t&#228;vlingar</h2>
+          <p class="section-subtitle">
+            Eng&#229;ngsregistrering - g&#246;rs en g&#229;ng, sedan &#228;r du
+            redo att t&#228;vla.
+          </p>
+
+          <div class="card-grid" style="margin-bottom: 1.5rem">
+            <div class="card">
+              <h3>&#127942; HobbyTouren Indoor</h3>
+              <p>
+                Veckot&#228;vlingar och majors f&#246;r alla hcp-klasser. Spela
+                n&#228;r det passar dig! &#214;ppen f&#246;r alla. Du spelar med
+                tourbollar i sval, v&#228;ders&#228;ker milj&#246; och f&#229;r
+                exakt data p&#229; varje slag.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#127942; H40+ Scratch Indoor</h3>
+              <p>
+                Seriespel f&#246;r klubbar inom &#214;sterg&#246;tland. F&#246;r
+                dig som &#228;r 40+. 3-mannalag med singel och shamble.
+                Representanter fr&#229;n Landeryd, Link&#246;ping,
+                Norrk&#246;ping, Mj&#246;lby och Vreta.
+              </p>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Viktigt:</strong> F&#246;r att spela i v&#229;ra
+            klubbt&#228;vlingar beh&#246;ver du <strong>INTE</strong> betala
+            n&#229;gon medlemsavgift p&#229; SimulatorGolfTour.com. Du
+            registrerar ett gratis konto.
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h3>Skapa konto p&#229; SimulatorGolfTour</h3>
+                <p>
+                  G&#229; till <strong>simulatorgolftour.com</strong> och klicka
+                  p&#229; profilikonen i &#246;vre h&#246;gra h&#246;rnet.
+                  V&#228;lj "Sign Up" och fyll i dina uppgifter. V&#228;lj ett
+                  <strong>username</strong>.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h3>Spara dina uppgifter</h3>
+                <p>N&#228;r du registrerat dig, spara tv&#229; saker:</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="warning-box"
+            style="margin-top: 0.75rem; margin-left: 3.5rem"
+          >
+            <strong>USERNAME</strong> - ditt anv&#228;ndarnamn
+            (skiftl&#228;gesk&#228;nsligt - STORA/sm&#229; bokst&#228;ver spelar
+            roll!)<br />
+            <strong>SGT UID</strong> - ditt unika ID-nummer<br />
+            B&#229;da beh&#246;vs f&#246;r att koppla ditt konto till GSPro.
+          </div>
+
+          <div class="steps" style="margin-top: 1rem">
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h3>Anm&#228;l dig till HobbyTouren</h3>
+                <p>
+                  Maila ditt <strong>USERNAME</strong> till
+                  <strong style="color: var(--primary)"
+                    >fredrik@lundberg.one</strong
+                  >
+                  s&#229; blir du inlagd i t&#228;vlingen. Du m&#229;ste vara
+                  registrerad hos Fredrik innan du kan spela.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="sub-heading" style="margin-top: 2rem">
+            Klasser &amp; avgift (HobbyTouren)
+          </h3>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Herrar - 2 klasser</h3>
+              <p>
+                Scratch och Netto (med hcp). Du deltar automatiskt i b&#229;da.
+                <strong>Avgift: 100 kr</strong> (50 kr scratch + 50 kr netto).
+              </p>
+            </div>
+            <div class="card">
+              <h3>Damer - 1 klass</h3>
+              <p>Netto-klass. <strong>Avgift: 50 kr.</strong></p>
+            </div>
+            <div class="card">
+              <h3>Betalning</h3>
+              <p>
+                Swisha till Sweden Indoor Golf AB:
+                <strong style="color: var(--primary)">123 196 97 32</strong>.
+                Ange "HT" som meddelande.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TÄVLINGAR: SPELA TÄVLING ==================== -->
+        <div class="section" id="tournament-play">
+          <h2 class="section-title">Spela t&#228;vling</h2>
+          <p class="section-subtitle">
+            G&#246;r detta varje g&#229;ng du spelar en t&#228;vlingsrunda.
+          </p>
+
+          <h3 class="sub-heading">Koppla ditt SGT-konto i GSPro</h3>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h3>&#214;ppna spelarinst&#228;llningar</h3>
+                <p>
+                  I GSPro, g&#229; till
+                  <span class="highlight">Settings</span> och sedan fliken
+                  <span class="highlight">Players</span>.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h3>Fyll i dina uppgifter</h3>
+                <p>
+                  <strong>Player Name:</strong> M&#229;ste matcha ditt SGT
+                  username
+                  <strong>EXAKT</strong> (skiftl&#228;gesk&#228;nsligt!).<br />
+                  <strong>SGT UID:</strong> Ditt unika ID fr&#229;n
+                  SimulatorGolfTour.
+                </p>
+                <div
+                  style="
+                    margin: 1rem 0;
+                    padding: 1rem 1.25rem;
+                    background: rgba(234, 179, 8, 0.1);
+                    border: 1px solid rgba(234, 179, 8, 0.3);
+                    border-radius: 12px;
+                  "
+                >
+                  <p style="margin: 0 0 0.5rem 0; font-weight: 600; color: var(--primary)">
+                    &#9889; Genv&#228;g!
+                  </p>
+                  <p style="margin: 0 0 0.75rem 0">
+                    Du beh&#246;ver inte leta upp ditt SGT UID manuellt. Fyll i
+                    ditt SGT-namn under Player Name, klicka sedan p&#229;
+                    <strong>SGT-genv&#228;gen</strong> i Windows startmeny (den
+                    finns fastn&#229;lad). Den h&#228;mtar automatiskt ditt SGT
+                    UID och fyller i det &#229;t dig.
+                  </p>
+                  <img
+                    src="../../../sig-web/public/support/sgt-shortcut.jpg"
+                    alt="SGT-genv&#228;g i Windows startmeny"
+                    style="
+                      width: 100%;
+                      max-width: 500px;
+                      border-radius: 8px;
+                      border: 1px solid rgba(255, 255, 255, 0.1);
+                    "
+                  />
+                </div>
+                <p>Spara inställningar och gå tillbaka till startsidan.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h3>Starta</h3>
+                <p>
+                  På startsidan, klicka
+                  <span class="highlight">Tournaments</span>.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <h3>V&#228;lj t&#228;vling</h3>
+                <p>
+                  V&#228;lj r&#228;tt anv&#228;ndare i
+                  anv&#228;ndarv&#228;ljaren (den med ditt kopplade SGT-konto).
+                  V&#228;lj sedan HobbyTouren Indoor i listan. Spela och njut!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="sub-heading" style="margin-top: 2rem">Vanliga problem</h3>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Ser inte t&#228;vlingen?</h3>
+              <p>
+                Kontrollera att din Player Name matchar ditt SGT username
+                <strong>EXAKT</strong> (inklusive stora/sm&#229; bokst&#228;ver)
+                och att du har fyllt i korrekt SGT UID. Kontrollera ocks&#229;
+                att du &#228;r inlagd i t&#228;vlingen.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Resultat registrerades inte?</h3>
+              <p>
+                Beror oftast p&#229; att Player Name och SGT username inte
+                matchar exakt. Dubbelkolla skiftl&#228;get p&#229; alla
+                bokst&#228;ver.
+              </p>
+            </div>
+          </div>
+
+          <h3 class="sub-heading" style="margin-top: 2rem">Vandringspokaler</h3>
+          <div class="card-grid">
+            <div class="card">
+              <h3>&#127942; Major Master</h3>
+              <p>B&#228;st p&#229; alla 3 majors totalt.</p>
+            </div>
+            <div class="card">
+              <h3>&#127942; HobbyTouren Leaderboard</h3>
+              <p>
+                B&#228;st totalt p&#229; alla veckot&#228;vlingar +
+                livet&#228;vlingar.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#127942; Fredex Cup</h3>
+              <p>
+                Vinnaren av 18-h&#229;lst&#228;vlingen i v11
+                (avslutningstävlingen).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== CLUB MARKERS ==================== -->
+        <div class="section" id="club-markers">
+          <h2 class="section-title">Club Markers</h2>
+          <p class="section-subtitle">
+            Extra klubbdata f&#246;r den som vill g&#229; djupare.
+          </p>
+
+          <div class="info-box">
+            <strong>OBS:</strong> Club markers beh&#246;vs
+            <strong>INTE</strong> f&#246;r att spela banor eller se bolldata! De
+            ger extra klubbdata som klubbhastighet, anfallsvinkel och
+            tr&#228;ffpunkt p&#229; bladet.
+          </div>
+
+          <div class="card-grid" style="margin-bottom: 1.5rem">
+            <div class="card">
+              <h3>Vad &#228;r det?</h3>
+              <p>
+                Sm&#229; markeringar som f&#228;sts p&#229; dina klubblad (4 st
+                per klubba). Ett set r&#228;cker till 14+ klubbor.
+              </p>
+            </div>
+            <div class="card">
+              <h3>K&#246;p &amp; h&#228;mtning</h3>
+              <p>
+                K&#246;ps via bokningssystemet MATCHi. Kvitteras ut i hallen
+                under bemannade tider (m&#229;n-ons, 14-20).
+              </p>
+            </div>
+          </div>
+
+          <h3 class="sub-heading">Placering per klubbtyp</h3>
+          <div class="marker-grid">
+            <div class="marker-card">
+              <img
+                src="../../../sig-web/public/support/club-marker-woods.png"
+                alt="Woods"
+              />
+              <div class="marker-label">Driver, Fairway &amp; Hybrid</div>
+            </div>
+            <div class="marker-card">
+              <img
+                src="../../../sig-web/public/support/club-marker-iron.png"
+                alt="Irons"
+              />
+              <div class="marker-label">J&#228;rn &amp; Wedge</div>
+            </div>
+            <div class="marker-card">
+              <img
+                src="../../../sig-web/public/support/club-marker-putter.png"
+                alt="Putter"
+              />
+              <div class="marker-label">Putter</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== FÖRSTA HJÄLPEN ==================== -->
+        <div class="section" id="troubleshooting">
+          <h2 class="section-title" style="color: #fca5a5">
+            F&#246;rsta hj&#228;lpen
+          </h2>
+          <p class="section-subtitle">
+            N&#228;r n&#229;got inte fungerar - f&#246;lj dessa steg i ordning.
+          </p>
+
+          <div class="trouble-step">
+            <div class="trouble-num">1</div>
+            <div class="trouble-text">
+              Starta genom att klicka p&#229; <strong>Practice</strong> &gt;
+              <strong>Driving Range</strong>.
+            </div>
+          </div>
+          <div class="trouble-step">
+            <div class="trouble-num">2</div>
+            <div class="trouble-text">
+              Placera bollen i den <strong>svarta rutan</strong>. Kontrollera
+              att det bara finns <strong>EN boll</strong> och inga andra
+              f&#246;rem&#229;l i det markerade omr&#229;det.
+            </div>
+          </div>
+          <div class="trouble-step">
+            <div class="trouble-num">3</div>
+            <div class="trouble-text">
+              Kontrollera att
+              <strong>pilarna p&#229; sk&#228;rmen lyser gr&#246;nt</strong>. Om
+              inte, justera bollens position.
+            </div>
+          </div>
+          <div class="trouble-step">
+            <div class="trouble-num">4</div>
+            <div class="trouble-text">
+              Tryck p&#229; <strong>Windows-knappen</strong> och v&#228;lj
+              <strong>Starta om</strong>. V&#228;nta tills GSPro-menyn visas
+              p&#229; sk&#228;rmen igen.
+            </div>
+          </div>
+          <div class="trouble-step">
+            <div class="trouble-num">5</div>
+            <div class="trouble-text">
+              Om pilarna lyser gr&#246;nt men slag registreras inte:
+              <strong>T&#228;ck &#246;ver alla fyra kamerorna</strong> p&#229;
+              GCQuad i n&#229;gra sekunder f&#246;r att &#229;terst&#228;lla
+              vitbalansen. Detta kan h&#228;nda om du st&#229;r i vita rutan med
+              vita skor. (G&#228;ller matta 1-2 och 4-8.)
+            </div>
+          </div>
+          <div class="trouble-step">
+            <div class="trouble-num">6</div>
+            <div class="trouble-text">
+              Fungerar det fortfarande inte?
+              <strong>Boka en annan bana</strong> och forts&#228;tt spela
+              d&#228;r. Meddela oss via mail s&#229; kompenserar vi dig f&#246;r
+              den extra bokningen.
+            </div>
+          </div>
+
+          <div class="contact-card" style="margin-top: 1.5rem">
+            <div class="contact-icon">&#9993;</div>
+            <div>
+              <div class="label">E-post</div>
+              <div class="value">info@swedenindoorgolf.se</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== KONTAKT ==================== -->
+        <div class="section" id="contact">
+          <h2 class="section-title">Kontakt</h2>
+          <p class="section-subtitle">
+            Beh&#246;ver du hj&#228;lp? H&#246;r av dig.
+          </p>
+
+          <div class="contact-card">
+            <div class="contact-icon">&#9993;</div>
+            <div>
+              <div class="label">E-post</div>
+              <div class="value">info@swedenindoorgolf.se</div>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">&#128205;</div>
+            <div>
+              <div class="label">Adress</div>
+              <div class="value">Industrigatan 5, 582 77 Link&#246;ping</div>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">&#128222;</div>
+            <div>
+              <div class="label">Bokning (MATCHi)</div>
+              <div class="value">010-405 88 00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /main -->
+    </div>
+    <!-- /layout -->
+
+    <script>
+      // Section navigation
+      const navButtons = document.querySelectorAll(".nav-btn");
+      const sections = document.querySelectorAll(".section");
+
+      navButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var target = btn.getAttribute("data-section");
+
+          navButtons.forEach(function (b) {
+            b.classList.remove("active");
+          });
+          btn.classList.add("active");
+
+          sections.forEach(function (s) {
+            s.classList.remove("active");
+          });
+          document.getElementById(target).classList.add("active");
+
+          // Scroll main content to top
+          document.querySelector(".main").scrollTop = 0;
+        });
+      });
+
+      // Bay detection for mat image
+      var params = new URLSearchParams(window.location.search);
+      var bayId = params.get("bay") || "BAY01";
+      var logicalBay = parseInt(bayId.replace(/\D/g, ""), 10) || 1;
+
+      if (logicalBay === 3) {
+        document.getElementById("mat-image").src =
+          "../../../sig-web/public/support/mat-3.jpg";
+      }
+
+      window.setBayId = function (id) {
+        var num = parseInt(id.replace(/\D/g, ""), 10) || 1;
+        document.getElementById("mat-image").src =
+          num === 3
+            ? "../../../sig-web/public/support/mat-3.jpg"
+            : "../../../sig-web/public/support/mat-1-2.jpg";
+      };
+
+      // AHK bridge: allow navigating to a section programmatically
+      window.showSection = function (id) {
+        var btn = document.querySelector('.nav-btn[data-section="' + id + '"]');
+        if (btn) btn.click();
+      };
+    </script>
+  </body>
+</html>
