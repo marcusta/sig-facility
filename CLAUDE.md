@@ -24,7 +24,12 @@ SimGolf Facility Management System for **Sweden Indoor Golf** — manages 8 unma
 
 ```
 config/          JSON configuration (shared.json, bays.json)
-lib/             PowerShell modules (Config.ps1)
+lib/
+  Config.ps1     PowerShell config module
+  ahk/           AHK v2 libraries
+    WebView2/    thqby's WebView2 wrapper + 64bit DLL
+    ComVar.ahk   COM variant helper
+    Promise.ahk  Promise/async helper
 install/         One-time installer, supervisor template, .NET runtime installer
 scripts/
   monitoring/    Disk space reporting to API
@@ -32,6 +37,11 @@ scripts/
   gspro-automation/  GSPro control scripts (AHK v1 & v2)
   gspro-settings/    Settings backup/restore
   popup/             Booking info display
+  overlay/           WebView2 overlay system
+    Overlay.ahk      Reusable overlay class
+    pages/           HTML content pages
+  overlay-dev.ahk    Standalone overlay dev harness
+  dev-mode.ps1       Feature branch auto-pull for bay testing
   assets/            Icons and external binaries (not in repo)
 ```
 
@@ -53,6 +63,27 @@ scripts/
 - `OnTopReplica` — overlay replicating the addon window
 
 ### State flags: `SystemState.isRecovering`, `isRestarting`, `isRepairingAddon`
+
+## Overlay System (in progress, branch: overlay-phase-0-1)
+
+WebView2-based HTML overlay for displaying content on top of GSPro.
+
+**Status:** Phase 0+1 complete (foundation verified on bay). Next: content and layout.
+
+**Structure:**
+- `lib/ahk/WebView2/` — thqby's WebView2.ahk library + 64-bit loader DLL
+- `lib/ahk/ComVar.ahk`, `lib/ahk/Promise.ahk` — WebView2 dependencies
+- `scripts/overlay/Overlay.ahk` — reusable class: borderless always-on-top GUI wrapping WebView2
+  - `Show(url, {w, h, x, y})`, `Hide()`, `Destroy()`, `Navigate(url)`, `Reload()`
+- `scripts/overlay/pages/` — HTML content pages
+- `scripts/overlay-dev.ahk` — standalone dev harness (runs without GSPro)
+  - `Ctrl+Shift+R` reload, `Ctrl+Shift+1/2/3` switch pages, `Escape` exit
+
+**AHK v2 gotcha:** AHK is case-insensitive. Do not use variable names that match class names (e.g. `overlay := Overlay()` fails).
+
+**Dev workflow:** Use `scripts/dev-mode.ps1 -Branch <name>` on a bay to auto-pull a feature branch every 5s. Push from dev machine, test on bay.
+
+**Related project:** `sig-web/` (gitignored) is a Next.js app containing content/data that the overlay will present.
 
 ## External Dependencies
 
