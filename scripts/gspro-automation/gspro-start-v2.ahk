@@ -276,10 +276,31 @@ CheckStartupComplete() {
     if (A_TickCount - startupStableSince < 5000)
         return
     startupComplete := true
-    LogStatus("System fully stable - finishing startup")
-    if OverlayMgr
-        OverlayMgr.HideStartup()
-    SetTimer(OpenVisualDataAndSetup, -500)
+    LogStatus("Connection stable - waiting for GSPro menu...")
+    SetTimer(WaitForGsproReady, 500)
+}
+
+; Pixel on GSPro logo text - white (FFFFFF) when main menu is loaded
+global GSPRO_READY_X := 1098
+global GSPRO_READY_Y := 58
+global GSPRO_READY_COLOR := 0xFFFFFF  ; BGR white
+
+WaitForGsproReady() {
+    if !WinExist(GAME_WINDOW) {
+        SetTimer(WaitForGsproReady, 0)
+        return
+    }
+
+    hwnd := WinExist(GAME_WINDOW)
+    color := GetPixelColorHidden(hwnd, GSPRO_READY_X, GSPRO_READY_Y)
+
+    if (color = GSPRO_READY_COLOR) {
+        SetTimer(WaitForGsproReady, 0)
+        LogStatus("GSPro menu detected - ready!")
+        if OverlayMgr
+            OverlayMgr.HideStartup()
+        SetTimer(OpenVisualDataAndSetup, -500)
+    }
 }
 
 OpenVisualDataAndSetup() {
@@ -324,7 +345,6 @@ OpenVisualDataAndSetup() {
     LogStatus("Setting window hierarchy...")
     SetWindowHierarchy()
     LogStatus("Window hierarchy set")
-
     LogStatus("System Ready")
 }
 
