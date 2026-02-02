@@ -73,10 +73,10 @@ class Overlay {
      * @param {Func} callback  Receives message string
      */
     OnMessage(callback) {
-        if this.wv
-            this.wv.add_WebMessageReceived(WebView2.Handler((_wv, args) {
-                callback.Call(args.TryGetWebMessageAsString())
-            }))
+        if this.wv {
+            handler := WebView2.Handler((_wv, args) => callback.Call(args.TryGetWebMessageAsString()))
+            this.wv.add_WebMessageReceived(handler)
+        }
     }
 
     /**
