@@ -57,6 +57,17 @@ class Overlay {
     }
 
     /**
+     * Map a virtual hostname to a local folder so HTML can use https://hostname/path.
+     * Must be called after Show() (needs wv).
+     * @param {String} hostName  e.g. "assets.local"
+     * @param {String} folder    e.g. "C:\SimGolf\sig-web\public"
+     */
+    MapHostToFolder(hostName, folder) {
+        if this.wv
+            this.wv.SetVirtualHostNameToFolderMapping(hostName, folder, 2)
+    }
+
+    /**
      * Navigate to a new URL without recreating the window.
      */
     Navigate(url) {

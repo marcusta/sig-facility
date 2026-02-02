@@ -31,7 +31,8 @@ class StartupOverlay {
 
         ov := Overlay()
         url := this._overlayMgr.GetPagesDir() . "startup.html?bay=" . bayId
-        ov.Show(url, {w: 1850, h: 1150, opacity: 242})
+        ov.Show(url, {w: 1850, h: 1150, opacity: 250})
+        ov.MapHostToFolder("assets.local", "C:\SimGolf\sig-web\public")
         this._overlay := ov
         this._active := true
     }

@@ -466,7 +466,7 @@
   <!-- ===== TOPBAR ===== -->
   <div class="topbar">
     <div class="topbar-brand">
-      <img src="file:///C:/SimGolf/sig-web/public/logo.png" alt="Sweden Indoor Golf">
+      <img src="https://assets.local/logo.png" alt="Sweden Indoor Golf">
       <span>SWEDEN <span class="accent">INDOOR GOLF</span></span>
     </div>
   </div>
@@ -479,14 +479,14 @@
     <!-- Slide 1: Instruction video -->
     <div class="slide slide-video active" data-slide="0">
       <video autoplay muted loop playsinline id="start-video">
-        <source src="file:///C:/SimGolf/sig-web/public/support/sig-start.mp4" type="video/mp4">
+        <source src="https://assets.local/support/sig-start.mp4" type="video/mp4">
       </video>
     </div>
 
     <!-- Slide 2: Ball placement -->
     <div class="slide slide-ball" data-slide="1">
       <div class="ball-image-wrap">
-        <img id="mat-image" src="file:///C:/SimGolf/sig-web/public/support/mat-1-2.jpg" alt="Bollplacering">
+        <img id="mat-image" src="https://assets.local/support/mat-1-2.jpg" alt="Bollplacering">
       </div>
       <div class="ball-info">
         <h2>Bollplacering</h2>
@@ -577,15 +577,15 @@
   const logicalBay = parseInt(bayId.replace(/\D/g, ""), 10) || 1;
 
   if (logicalBay === 3) {
-    document.getElementById("mat-image").src = "file:///C:/SimGolf/sig-web/public/support/mat-3.jpg";
+    document.getElementById("mat-image").src = "https://assets.local/support/mat-3.jpg";
   }
 
   // AHK can also call this after load
   window.setBayId = function(id) {
     const num = parseInt(id.replace(/\D/g, ""), 10) || 1;
     document.getElementById("mat-image").src = num === 3
-      ? "file:///C:/SimGolf/sig-web/public/support/mat-3.jpg"
-      : "file:///C:/SimGolf/sig-web/public/support/mat-1-2.jpg";
+      ? "https://assets.local/support/mat-3.jpg"
+      : "https://assets.local/support/mat-1-2.jpg";
   };
 
   // ===== SLIDE ROTATION =====
