@@ -1,38 +1,23 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-#Include "overlay\Overlay.ahk"
+#Include "overlay\OverlayManager.ahk"
 
-; --- Config ---
-overlayDir := A_ScriptDir "\overlay\pages"
-defaultPage := overlayDir "\test.html"
-
-; Accept CLI arg for HTML file path
-htmlPath := A_Args.Length ? A_Args[1] : defaultPage
-if !FileExist(htmlPath) {
-    MsgBox("File not found: " htmlPath)
-    ExitApp
+; --- Read bay ID (default BAY01 for dev) ---
+bayId := "BAY01"
+try {
+    bayJson := FileRead("C:\SimGolf\bay-identity.json")
+    if RegExMatch(bayJson, '"bayId"\s*:\s*"(\w+)"', &m)
+        bayId := m[1]
 }
 
-; Convert to file:/// URL
-fileUrl := "file:///" StrReplace(htmlPath, "\", "/")
-
-; --- Create wnd ---
-wnd := Overlay()
-wnd.Show(fileUrl, {w: 800, h: 600})
+mgr := OverlayManager(bayId)
+mgr.ShowStartup()
 
 ; --- Hotkeys ---
-^+r:: wnd.Reload()                                              ; Ctrl+Shift+R — reload
-
-^+1:: wnd.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))   ; test page
-^+2:: {                                                              ; placeholder boot page
-    wnd.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))
-}
-^+3:: {                                                              ; placeholder help page
-    wnd.Navigate("file:///" StrReplace(overlayDir "\test.html", "\", "/"))
-}
-
+^+r:: mgr._startup._overlay.Reload()  ; Ctrl+Shift+R -- reload
+^+x::
 Escape:: {
-    wnd.Destroy()
-    ExitApp
+    mgr.Cleanup()
+    ExitApp()
 }
