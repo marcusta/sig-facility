@@ -253,6 +253,20 @@ InitializeSystem() {
     LogStatus("Connector found, waiting for connection...")
 }
 
+global startupComplete := false
+CheckStartupComplete() {
+    global startupComplete
+    if startupComplete
+        return
+    if !SystemState.connectionStable || !SystemState.linkStable
+        return
+    startupComplete := true
+    LogStatus("System fully connected - finishing startup")
+    if OverlayMgr
+        OverlayMgr.HideStartup()
+    SetTimer(OpenVisualDataAndSetup, -500)
+}
+
 OpenVisualDataAndSetup() {
     LogStatus("Opening Visual Data...")
 
@@ -381,6 +395,7 @@ SampleLinkBar(hwnd) {
             SystemState.linkStable := true
             SystemState.linkEverGreen := true
             LogStatus("Link bar: STABLE (debounced)")
+            CheckStartupComplete()
         }
     }
     else if (color = BGR_RED) {
@@ -405,13 +420,9 @@ SampleConnection(hwnd) {
 
         if (SystemState.connGreenCount >= DEBOUNCE_SAMPLES && !SystemState.connectionStable) {
             SystemState.connectionStable := true
-            if !SystemState.connectionEverGreen {
+            if !SystemState.connectionEverGreen
                 SystemState.connectionEverGreen := true
-                ; First time connected -- hide startup overlay, then set up UI
-                if OverlayMgr
-                    OverlayMgr.HideStartup()
-                SetTimer(OpenVisualDataAndSetup, -500)
-            }
+            CheckStartupComplete()
             LogStatus("Connection: STABLE (debounced)")
 
             ; If we were recovering, end recovery and restore UI
