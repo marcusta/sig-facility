@@ -69,6 +69,26 @@ class Overlay {
     }
 
     /**
+     * Register a callback for WebView2 postMessage events.
+     * @param {Func} callback  Receives message string
+     */
+    OnMessage(callback) {
+        if this.wv
+            this.wv.add_WebMessageReceived(WebView2.Handler((_wv, args) {
+                callback.Call(args.TryGetWebMessageAsString())
+            }))
+    }
+
+    /**
+     * Execute JavaScript in the WebView2.
+     * @param {String} script  JS code to execute
+     */
+    ExecuteScript(script) {
+        if this.wv
+            this.wv.ExecuteScriptAsync(script)
+    }
+
+    /**
      * Navigate to a new URL without recreating the window.
      */
     Navigate(url) {

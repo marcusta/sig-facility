@@ -1,6 +1,8 @@
 #Requires AutoHotkey v2.0
 #Include "Overlay.ahk"
 #Include "StartupOverlay.ahk"
+#Include "HelpButton.ahk"
+#Include "HelpOverlay.ahk"
 
 /**
  * OverlayManager -- registry of overlays, z-order, cleanup.
@@ -12,6 +14,8 @@ class OverlayManager {
     _bayId := ""
     _pagesDir := ""
     _startup := ""
+    _helpBtn := ""
+    _helpOv := ""
 
     /**
      * @param {String} bayId  e.g. "BAY03"
@@ -28,6 +32,8 @@ class OverlayManager {
         this._pagesDir := "file:///" . pagesPath
 
         this._startup := StartupOverlay(this)
+        this._helpOv := HelpOverlay(this)
+        this._helpBtn := HelpButton(this, ObjBindMethod(this, "_onHelpClick"))
     }
 
     /**
@@ -38,10 +44,25 @@ class OverlayManager {
     }
 
     /**
-     * Hide the startup overlay (call when LM connection goes green).
+     * Hide the startup overlay.
      */
     HideStartup() {
         this._startup.Hide()
+    }
+
+    /**
+     * Show the help button (call after startup completes).
+     */
+    ShowHelpButton() {
+        this._helpBtn.Show()
+    }
+
+    /**
+     * Set alert state on the help button (pulsing red during errors).
+     * @param {Boolean} active
+     */
+    SetHelpAlert(active) {
+        this._helpBtn.SetAlert(active)
     }
 
     /**
@@ -49,6 +70,8 @@ class OverlayManager {
      */
     Cleanup() {
         this._startup.Destroy()
+        this._helpBtn.Destroy()
+        this._helpOv.Destroy()
     }
 
     /**
@@ -56,5 +79,11 @@ class OverlayManager {
      */
     GetPagesDir() {
         return this._pagesDir
+    }
+
+    ; --- internal callbacks ---
+
+    _onHelpClick() {
+        this._helpOv.Toggle()
     }
 }

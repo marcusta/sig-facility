@@ -354,6 +354,11 @@ OpenVisualDataAndSetup() {
     SetWindowHierarchy()
     LogStatus("Window hierarchy set")
     global setupComplete := true
+
+    ; Show help button now that system is ready
+    if OverlayMgr
+        OverlayMgr.ShowHelpButton()
+
     LogStatus("System Ready")
 }
 
@@ -556,6 +561,12 @@ UpdateIndicatorMode() {
         LogStatus("Indicator: " . IndicatorModeName(currentIndicatorMode) . " -> " . IndicatorModeName(newMode), !isQuiet)
         currentIndicatorMode := newMode
         blinkStep := 0  ; Reset blink pattern
+
+        ; Alert the help button during error states
+        if OverlayMgr {
+            isError := (newMode = IndicatorMode.BlinkSlow || newMode = IndicatorMode.BlinkFast || newMode = IndicatorMode.BlinkCodeGspro || newMode = IndicatorMode.BlinkCodeLM)
+            OverlayMgr.SetHelpAlert(isError)
+        }
     }
 }
 

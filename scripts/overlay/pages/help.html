@@ -32,12 +32,59 @@
 
       body {
         font-family: "Inter", system-ui, sans-serif;
-        background: var(--bg);
+        background: transparent;
         color: var(--text-primary);
         height: 100vh;
         overflow: hidden;
         display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 0;
+      }
+
+      .help-container {
+        position: relative;
+        z-index: 1;
+        width: 1700px;
+        height: 1000px;
+        background: var(--bg);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        display: flex;
         flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 16px;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        font-size: 1.25rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        z-index: 30;
+      }
+
+      .close-btn:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
       }
 
       /* ========== TOPBAR ========== */
@@ -776,10 +823,13 @@
     </style>
   </head>
   <body>
+    <div class="backdrop" id="backdrop"></div>
+    <div class="help-container">
+    <button class="close-btn" id="close-btn">&#x2715;</button>
     <!-- ===== TOPBAR ===== -->
     <div class="topbar">
       <div class="topbar-brand">
-        <img src="../../../sig-web/public/logo.png" alt="Sweden Indoor Golf" />
+        <img src="images/logo.png" alt="Sweden Indoor Golf" />
         <span>SWEDEN <span class="accent">INDOOR GOLF</span></span>
       </div>
       <div class="topbar-title">Hjälpcenter</div>
@@ -883,7 +933,7 @@
                 </p>
                 <img
                   class="indicator-img"
-                  src="../../../sig-web/public/support/chevrons-green.jpg"
+                  src="images/chevrons-green.jpg"
                   alt="Gröna pilar på skärmen"
                 />
               </div>
@@ -918,7 +968,7 @@
             <div class="ball-media-video">
               <video autoplay muted loop playsinline>
                 <source
-                  src="../../../sig-web/public/support/sig-start.mp4"
+                  src="images/sig-start.mp4"
                   type="video/mp4"
                 />
               </video>
@@ -926,7 +976,7 @@
             <div class="ball-media-img">
               <img
                 id="mat-image"
-                src="../../../sig-web/public/support/mat-1-2.jpg"
+                src="images/mat-1-2.jpg"
                 alt="Bollplacering på mattan"
               />
             </div>
@@ -1471,7 +1521,7 @@
                     det åt dig.
                   </p>
                   <img
-                    src="../../../sig-web/public/support/sgt-shortcut.jpg"
+                    src="images/sgt-shortcut.jpg"
                     alt="SGT-genväg i Windows startmeny"
                     style="
                       width: 100%;
@@ -1578,21 +1628,21 @@
           <div class="marker-grid">
             <div class="marker-card">
               <img
-                src="../../../sig-web/public/support/club-marker-woods.png"
+                src="images/club-marker-woods.png"
                 alt="Woods"
               />
               <div class="marker-label">Driver, Fairway &amp; Hybrid</div>
             </div>
             <div class="marker-card">
               <img
-                src="../../../sig-web/public/support/club-marker-iron.png"
+                src="images/club-marker-iron.png"
                 alt="Irons"
               />
               <div class="marker-label">Järn &amp; Wedge</div>
             </div>
             <div class="marker-card">
               <img
-                src="../../../sig-web/public/support/club-marker-putter.png"
+                src="images/club-marker-putter.png"
                 alt="Putter"
               />
               <div class="marker-label">Putter</div>
@@ -1699,6 +1749,8 @@
       <!-- /main -->
     </div>
     <!-- /layout -->
+    </div>
+    <!-- /help-container -->
 
     <script>
       // Section navigation
@@ -1731,15 +1783,15 @@
 
       if (logicalBay === 3) {
         document.getElementById("mat-image").src =
-          "../../../sig-web/public/support/mat-3.jpg";
+          "images/mat-3.jpg";
       }
 
       window.setBayId = function (id) {
         var num = parseInt(id.replace(/\D/g, ""), 10) || 1;
         document.getElementById("mat-image").src =
           num === 3
-            ? "../../../sig-web/public/support/mat-3.jpg"
-            : "../../../sig-web/public/support/mat-1-2.jpg";
+            ? "images/mat-3.jpg"
+            : "images/mat-1-2.jpg";
       };
 
       // AHK bridge: allow navigating to a section programmatically
@@ -1747,6 +1799,15 @@
         var btn = document.querySelector('.nav-btn[data-section="' + id + '"]');
         if (btn) btn.click();
       };
+
+      // Close button and backdrop -> notify AHK
+      function closeHelp() {
+        if (window.chrome && window.chrome.webview) {
+          window.chrome.webview.postMessage("help-close");
+        }
+      }
+      document.getElementById("close-btn").addEventListener("click", closeHelp);
+      document.getElementById("backdrop").addEventListener("click", closeHelp);
     </script>
   </body>
 </html>
