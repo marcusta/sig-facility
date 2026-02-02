@@ -31,7 +31,7 @@ class StartupOverlay {
 
         ov := Overlay()
         url := this._overlayMgr.GetPagesDir() . "startup.html?bay=" . bayId
-        ov.Show(url, {w: 1700, h: 1000, opacity: 216})
+        ov.Show(url, {w: 1850, h: 1150, opacity: 242})
         this._overlay := ov
         this._active := true
     }
