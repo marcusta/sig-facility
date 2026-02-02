@@ -44,7 +44,7 @@ class Overlay {
         this.gui := g
 
         ; Create WebView2 synchronously inside the GUI
-        wvc := WebView2.create(g.Hwnd)
+        wvc := WebView2.create(g.Hwnd, , , , , {AdditionalBrowserArguments: "--autoplay-policy=no-user-gesture-required"})
         this.wvc := wvc
         this.wv := wvc.CoreWebView2
 
