@@ -323,12 +323,7 @@ OpenVisualDataAndSetup() {
 
     LogStatus("Setting window hierarchy...")
     SetWindowHierarchy()
-    Sleep(500)
-
-    if WinExist(GAME_WINDOW) {
-        WinActivate(GAME_WINDOW)
-        WinMoveTop(GAME_WINDOW)
-    }
+    LogStatus("Window hierarchy set")
 
     LogStatus("System Ready")
 }
@@ -962,9 +957,12 @@ SetWindowHierarchy() {
     }
 
     ; Bring game window to front
-    WinActivate(GAME_WINDOW)
+    LogStatus("Hierarchy: activating game...", false)
+    try WinActivate(GAME_WINDOW)
+    LogStatus("Hierarchy: game activated", false)
     Sleep(100)
-    WinMoveTop(GAME_WINDOW)
+    try WinMoveTop(GAME_WINDOW)
+    LogStatus("Hierarchy: game on top", false)
 
     ; Overlay should be always on top
     if WinExist(REPLICA_WINDOW)
