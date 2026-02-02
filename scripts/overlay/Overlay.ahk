@@ -51,8 +51,9 @@ class Overlay {
         ; Size the webview to fill the window
         this._resizeWebView(w, h)
 
-        ; Navigate to requested URL
-        this.wv.Navigate(url)
+        ; Navigate to requested URL (if provided)
+        if (url != "")
+            this.wv.Navigate(url)
         this._visible := true
     }
 
