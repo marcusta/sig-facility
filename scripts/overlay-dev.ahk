@@ -15,10 +15,11 @@ mgr := OverlayManager(bayId)
 mgr.ShowStartup()
 
 ; Auto-hide startup after 5s and show help button (for dev testing)
-SetTimer(() {
+afterStartup() {
     mgr.HideStartup()
     mgr.ShowHelpButton()
-}, -5000)
+}
+SetTimer(afterStartup, -5000)
 
 ; --- Hotkeys ---
 ^+r:: {
