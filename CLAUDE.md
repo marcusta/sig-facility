@@ -86,7 +86,7 @@ WebView2-based HTML overlay for displaying content on top of GSPro.
   - Topbar with SIG logo and brand text
   - Golden radial gradient background from top-right corner
   - Bay detection via `?bay=BAY03` query param or `window.setBayId("BAY03")` JS bridge call (bay 3 gets mat-3.jpg, others get mat-1-2.jpg)
-  - Assets referenced from `sig-web/public/support/` (video, mat images)
+  - Assets stored in `scripts/overlay/pages/images/` (logo, mat images, video via Git LFS)
 
 **Design system (shared across overlay pages):**
 - Brand colors: `--primary: #eab308` (yellow), `--bg: #020617` (slate-950), `--bg-secondary: #0f172a` (slate-900)
@@ -98,7 +98,7 @@ WebView2-based HTML overlay for displaying content on top of GSPro.
 
 **Dev workflow:** Use `scripts/dev-mode.ps1 -Branch <name>` on a bay to auto-pull a feature branch every 5s. Push from dev machine, test on bay.
 
-**Related project:** `sig-web/` (gitignored) is a Next.js app containing content/data that the overlay will present.
+**Related project:** `sig-web/` (gitignored) is a local copy of the Next.js website for reference only. It is NOT part of this project and is not deployed to bays. Never reference files from `sig-web/` in overlay HTML or scripts -- all assets must live within the repo (under `scripts/overlay/pages/images/` or similar).
 
 ## External Dependencies
 
