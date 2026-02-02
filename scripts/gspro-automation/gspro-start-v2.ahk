@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+#Include "..\overlay\OverlayManager.ahk"
 
 ; ##################################################################
 ; CONFIGURATION
@@ -214,6 +215,21 @@ if (relayEnabled)
     InitializeRelay()
 else
     LogStatus("Relay disabled (no-relay flag)")
+
+; Read bay identity and create overlay manager
+global OverlayMgr := ""
+try {
+    bayJson := FileRead("C:\SimGolf\bay-identity.json")
+    if RegExMatch(bayJson, '"bayId"\s*:\s*"(\w+)"', &bayMatch)
+        OverlayMgr := OverlayManager(bayMatch[1])
+}
+if !OverlayMgr
+    LogStatus("Warning: Could not read bay identity for overlay")
+
+; Show startup overlay before boot sequence
+if OverlayMgr
+    OverlayMgr.ShowStartup()
+
 InitializeSystem()
 StartTimers()
 
@@ -382,7 +398,12 @@ SampleConnection(hwnd) {
 
         if (SystemState.connGreenCount >= DEBOUNCE_SAMPLES && !SystemState.connectionStable) {
             SystemState.connectionStable := true
-            SystemState.connectionEverGreen := true
+            if !SystemState.connectionEverGreen {
+                SystemState.connectionEverGreen := true
+                ; First time connected -- hide startup overlay
+                if OverlayMgr
+                    OverlayMgr.HideStartup()
+            }
             LogStatus("Connection: STABLE (debounced)")
 
             ; If we were recovering, end recovery and restore UI
@@ -946,6 +967,9 @@ CleanupAndExit() {
     SetTimer(UIEnforcementTick, 0)
     SetTimer(BlinkEngineTick, 0)
     SetTimer(RecoveryTick, 0)
+
+    if OverlayMgr
+        OverlayMgr.Cleanup()
 
     if (relayEnabled) {
         SetRelayRed()

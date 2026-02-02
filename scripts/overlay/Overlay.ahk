@@ -34,9 +34,13 @@ class Overlay {
         x := options.HasOwnProp("x") ? options.x : (A_ScreenWidth - w) // 2
         y := options.HasOwnProp("y") ? options.y : (A_ScreenHeight - h) // 2
 
+        opacity := options.HasOwnProp("opacity") ? options.opacity : 0
+
         g := Gui("+AlwaysOnTop -Caption +ToolWindow")
         g.BackColor := "0x000000"
         g.Show("w" w " h" h " x" x " y" y)
+        if (opacity > 0 && opacity < 255)
+            WinSetTransparent(opacity, g.Hwnd)
         this.gui := g
 
         ; Create WebView2 synchronously inside the GUI
