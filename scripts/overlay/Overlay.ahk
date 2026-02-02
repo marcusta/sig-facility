@@ -17,7 +17,11 @@ class Overlay {
     wv  := ""       ; WebView2.Core (CoreWebView2)
     _visible := false
 
+    static _instanceCount := 0
+
     __New() {
+        Overlay._instanceCount += 1
+        this._instanceId := Overlay._instanceCount
     }
 
     /**
@@ -43,8 +47,9 @@ class Overlay {
             WinSetTransparent(opacity, g.Hwnd)
         this.gui := g
 
-        ; Create WebView2 synchronously inside the GUI
-        wvc := WebView2.create(g.Hwnd, , , , , {AdditionalBrowserArguments: "--autoplay-policy=no-user-gesture-required"})
+        ; Create WebView2 synchronously inside the GUI (each instance gets its own data dir)
+        dataDir := A_Temp . "\sig-overlay-" . this._instanceId
+        wvc := WebView2.create(g.Hwnd, , , dataDir, , {AdditionalBrowserArguments: "--autoplay-policy=no-user-gesture-required"})
         this.wvc := wvc
         this.wv := wvc.CoreWebView2
 
