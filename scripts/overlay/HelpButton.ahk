@@ -27,7 +27,7 @@ class HelpButton {
             return
 
         ov := Overlay()
-        ov.Show("", {w: 64, h: 64, x: 1840, y: 1120})
+        ov.Show("", {w: 52, h: 52, x: 1860, y: 1140})
         ov.OnMessage(ObjBindMethod(this, "_onMessage"))
         try ov.wvc.DefaultBackgroundColor := 0
         url := this._overlayMgr.GetPagesDir() . "help-button.html"
