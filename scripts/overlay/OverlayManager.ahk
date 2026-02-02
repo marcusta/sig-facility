@@ -20,7 +20,9 @@ class OverlayManager {
         this._bayId := bayId
 
         ; Build file:/// path to pages directory
-        pagesPath := A_ScriptDir . "\overlay\pages\"
+        ; A_LineFile resolves to this file's location (scripts/overlay/)
+        thisDir := RegExReplace(A_LineFile, "\\[^\\]+$", "")
+        pagesPath := thisDir . "\pages\"
         ; Convert backslashes to forward slashes for file:/// URL
         pagesPath := StrReplace(pagesPath, "\", "/")
         this._pagesDir := "file:///" . pagesPath
