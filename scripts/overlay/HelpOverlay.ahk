@@ -20,6 +20,7 @@ class HelpOverlay {
      * Show the help overlay.
      */
     Open() {
+        MsgBox("DEBUG Open: _open=" . this._open . " _overlay=" . Type(this._overlay))
         if this._open
             return
 
