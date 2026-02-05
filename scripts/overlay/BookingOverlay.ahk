@@ -29,12 +29,12 @@ class BookingOverlay {
             this._overlay.Show()
         }
 
-        script := "setMessage(" . _
-            this._jsStr(msg.type) . "," . _
-            this._jsStr(msg.customerName) . "," . _
-            this._jsStr(msg.startTime) . "," . _
-            this._jsStr(msg.endTime) . "," . _
-            this._jsStr(msg.level) . "," . _
+        script := "setMessage(" .
+            this._jsStr(msg.type) . "," .
+            this._jsStr(msg.customerName) . "," .
+            this._jsStr(msg.startTime) . "," .
+            this._jsStr(msg.endTime) . "," .
+            this._jsStr(msg.level) . "," .
             this._jsStr(msg.courseSuggestion) . ")"
         this._overlay.ExecuteScript(script)
         this._open := true
