@@ -3,11 +3,20 @@
 /**
  * BookingOverlay -- booking message overlay (WebView2).
  * Driven by JSON payload from bookings service.
+ *
+ * Rules:
+ *   - Show on HTTP 200 from server
+ *   - Only close on explicit user click
+ *   - Replace content if already shown and new poll returns data
+ *
+ * On first show the page loads async, so the setMessage() call is
+ * deferred until the page sends a "booking-ready" postMessage.
  */
 class BookingOverlay {
     _overlay := ""
     _overlayMgr := ""
     _open := false
+    _pendingScript := ""
 
     __New(overlayMgr) {
         this._overlayMgr := overlayMgr
@@ -18,17 +27,6 @@ class BookingOverlay {
         if !msg.type
             return
 
-        if !this._overlay {
-            ov := Overlay()
-            ov.Show("", {w: 1200, h: 840, x: 60, y: 120})
-            ov.OnMessage(ObjBindMethod(this, "_onMessage"))
-            url := this._overlayMgr.GetPagesDir() . "booking.html"
-            ov.Navigate(url)
-            this._overlay := ov
-        } else if !this._overlay.IsVisible {
-            this._overlay.Show()
-        }
-
         script := "setMessage(" .
             this._jsStr(msg.type) . "," .
             this._jsStr(msg.customerName) . "," .
@@ -36,7 +34,23 @@ class BookingOverlay {
             this._jsStr(msg.endTime) . "," .
             this._jsStr(msg.level) . "," .
             this._jsStr(msg.courseSuggestion) . ")"
-        this._overlay.ExecuteScript(script)
+
+        if !this._overlay {
+            ov := Overlay()
+            ov.Show("", {w: 1200, h: 840, x: 60, y: 120})
+            ov.OnMessage(ObjBindMethod(this, "_onMessage"))
+            url := this._overlayMgr.GetPagesDir() . "booking.html"
+            ov.Navigate(url)
+            this._overlay := ov
+            ; Page not loaded yet -- defer script until "booking-ready"
+            this._pendingScript := script
+        } else if !this._overlay.IsVisible {
+            this._overlay.Show()
+            this._overlay.ExecuteScript(script)
+        } else {
+            ; Already visible -- replace content
+            this._overlay.ExecuteScript(script)
+        }
         this._open := true
     }
 
@@ -48,6 +62,7 @@ class BookingOverlay {
 
     Destroy() {
         this._open := false
+        this._pendingScript := ""
         if this._overlay {
             this._overlay.Destroy()
             this._overlay := ""
@@ -61,8 +76,14 @@ class BookingOverlay {
     ; --- internal ---
 
     _onMessage(msg) {
-        if (msg = "booking-close")
+        if (msg = "booking-close") {
             this.Hide()
+        } else if (msg = "booking-ready") {
+            if (this._pendingScript != "") {
+                this._overlay.ExecuteScript(this._pendingScript)
+                this._pendingScript := ""
+            }
+        }
     }
 
     _parseMessage(jsonBody) {

@@ -1091,16 +1091,13 @@ BookingPollTick() {
     if !bookingPollEnabled || !OverlayMgr
         return
 
-    if OverlayMgr.IsStartupActive() || OverlayMgr.IsHelpOpen() || SystemState.isRecovering || SystemState.isRestarting {
-        OverlayMgr.HideBooking()
+    ; Skip polling during startup/recovery but never auto-hide
+    if OverlayMgr.IsStartupActive() || SystemState.isRecovering || SystemState.isRestarting
         return
-    }
 
     res := FetchBookingMessage(bookingUrl)
     if (res.status = 200 && res.body != "") {
         OverlayMgr.ShowBookingMessage(res.body)
-    } else {
-        OverlayMgr.HideBooking()
     }
 }
 

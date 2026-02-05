@@ -429,6 +429,11 @@
         window.chrome.webview.postMessage("booking-close");
       }
     });
+
+    // Signal AHK that page is ready to receive setMessage() calls
+    if (window.chrome && window.chrome.webview) {
+      window.chrome.webview.postMessage("booking-ready");
+    }
   </script>
 </body>
 </html>
