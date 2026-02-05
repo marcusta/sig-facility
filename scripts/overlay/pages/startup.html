@@ -282,6 +282,22 @@
     border-radius: 6px;
   }
 
+  .step-image {
+    width: 100%;
+    max-width: 180px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: 0.25rem;
+  }
+
+  .step-or {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0.25rem 0;
+    font-style: italic;
+  }
+
   /* --- Slide 4: Troubleshooting --- */
   .slide-help {
     flex-direction: column;
@@ -519,8 +535,10 @@
         </div>
         <div class="step">
           <div class="step-num">2</div>
-          <h3>Vänta på SLÅ</h3>
-          <p>Kontrollera att det står <span class="highlight">SLÅ</span> i den gröna rutan på skärmen</p>
+          <h3>Vänta på grönt</h3>
+          <p>Vänta tills pilarna i nederdelen av skärmen blir <span class="highlight">gröna</span></p>
+          <img class="step-image" src="images/chevrons-green.jpg" alt="Gröna pilar">
+          <span class="step-or">eller att gröna lampan lyser</span>
         </div>
         <div class="step">
           <div class="step-num">3</div>
