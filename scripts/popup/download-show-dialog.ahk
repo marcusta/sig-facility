@@ -1,11 +1,15 @@
 #Requires AutoHotkey v2.0
+#Include "..\overlay\Overlay.ahk"
 Persistent
 
 ; --- Configuration ---
 REPO_ROOT := "C:\SimGolf\sig-facility"
 IDENTITY_PATH := "C:\SimGolf\bay-identity.json"
-IMAGE_PATH := REPO_ROOT "\scripts\popup\dialog-image.jpg"
 POLL_INTERVAL_MS := 60000
+OVERLAY_W := 980
+OVERLAY_H := 520
+OVERLAY_X := 100
+OVERLAY_Y := 300
 
 ; Read bay identity and court ID at startup
 matchiCourtId := ReadCourtId(IDENTITY_PATH, REPO_ROOT "\config\bays.json")
@@ -14,95 +18,111 @@ if !matchiCourtId {
     ExitApp
 }
 
-downloadUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-image"
+downloadUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message"
+
+global bookingOverlay := ""
+global bookingOverlayUrl := BuildBookingPageUrl()
 
 ; Poll every 60 seconds
 SetTimer(CheckAndShow, POLL_INTERVAL_MS)
 CheckAndShow()  ; run immediately on startup
 
 CheckAndShow() {
-    global downloadUrl, IMAGE_PATH
+    global downloadUrl
+    res := FetchMessage(downloadUrl)
 
-    ; Always delete old image first so a failed download means no file
-    if FileExist(IMAGE_PATH)
-        FileDelete(IMAGE_PATH)
-
-    ; Download image via WinHTTP to inspect status code
-    try {
-        whr := ComObject("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", downloadUrl, false)
-        whr.Send()
-
-        if whr.Status != 200
-            return
-
-        ; Write response body to file
-        stream := ComObject("ADODB.Stream")
-        stream.Type := 1  ; binary
-        stream.Open()
-        stream.Write(whr.ResponseBody)
-        stream.SaveToFile(IMAGE_PATH, 2)  ; overwrite
-        stream.Close()
-    } catch {
-        return
-    }
-
-    ; Verify download was 200, file exists, and has content
-    if whr.Status != 200
-        return
-    if !FileExist(IMAGE_PATH)
-        return
-    if FileGetSize(IMAGE_PATH) < 100
-        return
-
-    ShowDialog(IMAGE_PATH)
+    if (res.status = 200 && res.body != "")
+        ShowMessage(res.body)
+    else
+        HideMessage()
 }
 
-ShowDialog(imagePath) {
-    ; Destroy any previous dialog
-    static dlg := false
-    if dlg {
-        dlg.Destroy()
-        dlg := false
+FetchMessage(url) {
+    try {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", url, false)
+        whr.Send()
+        return { status: whr.Status, body: whr.ResponseText }
+    } catch {
+        return { status: 0, body: "" }
     }
+}
 
-    if !FileExist(imagePath)
+ShowMessage(jsonBody) {
+    global bookingOverlay, bookingOverlayUrl
+
+    msg := ParseMessage(jsonBody)
+    if !msg.type
         return
 
-    dlg := Gui("+AlwaysOnTop -SysMenu +Owner -Caption")
-    dlg.MarginX := 0
-    dlg.MarginY := 0
-    try
-        dlg.AddPicture("x0 y0 w700 h400", imagePath)
-    catch {
-        dlg.Destroy()
-        return
+    if !bookingOverlay {
+        bookingOverlay := Overlay()
+        bookingOverlay.Show("", {w: OVERLAY_W, h: OVERLAY_H, x: OVERLAY_X, y: OVERLAY_Y})
+        bookingOverlay.OnMessage(Func("_OnBookingMessage"))
+        bookingOverlay.Navigate(bookingOverlayUrl)
+    } else if !bookingOverlay.IsVisible {
+        bookingOverlay.Show(bookingOverlayUrl)
     }
-    dlg.OnEvent("Close", (*) => dlg.Destroy())
 
-    ; Click anywhere to dismiss
-    dlg.OnEvent("Close", (*) => dlg.Destroy())
-    clickHandler := ObjBindMethod(dlg, "Destroy")
-    dlg.AddText("x0 y0 w700 h400 +0x201 BackgroundTrans", "")
-        .OnEvent("Click", (*) => dlg.Destroy())
+    script := "setMessage(" . _
+        JsStr(msg.type) . "," . _
+        JsStr(msg.customerName) . "," . _
+        JsStr(msg.startTime) . "," . _
+        JsStr(msg.endTime) . "," . _
+        JsStr(msg.level) . "," . _
+        JsStr(msg.courseSuggestion) . ")"
+    bookingOverlay.ExecuteScript(script)
+}
 
-    WinSetTransparent(0, dlg)
-    dlg.Show("NoActivate w700 h400 x100 y300")
-    dlg.Title := "Sweden Indoor Golf"
+HideMessage() {
+    global bookingOverlay
+    if bookingOverlay
+        bookingOverlay.Hide()
+}
 
-    ; Fade in
-    opacity := 0
-    loop {
-        opacity += 7
-        if opacity > 255
-            opacity := 255
-        try WinSetTransparent(opacity, dlg)
-        catch
-            return
-        if opacity >= 255
-            break
-        Sleep(10)
-    }
+_OnBookingMessage(msg) {
+    if (msg = "booking-close")
+        HideMessage()
+}
+
+BuildBookingPageUrl() {
+    pagesDir := RegExReplace(A_ScriptDir, "\\popup$", "\\overlay\\pages\\")
+    pagesDir := StrReplace(pagesDir, "\", "/")
+    return "file:///" . pagesDir . "booking.html"
+}
+
+ParseMessage(jsonBody) {
+    msg := {}
+    msg.type := JsonStringValue(jsonBody, "type")
+    msg.customerName := JsonStringValue(jsonBody, "customerName")
+    msg.startTime := JsonStringValue(jsonBody, "startTime")
+    msg.endTime := JsonStringValue(jsonBody, "endTime")
+    msg.level := JsonStringValue(jsonBody, "level")
+    msg.courseSuggestion := JsonStringValue(jsonBody, "courseSuggestion")
+    return msg
+}
+
+JsonStringValue(jsonBody, key) {
+    if RegExMatch(jsonBody, '"' key '"\s*:\s*"((?:\\.|[^"])*)"', &m)
+        return UnescapeJson(m[1])
+    return ""
+}
+
+UnescapeJson(s) {
+    s := StrReplace(s, "\/", "/")
+    s := StrReplace(s, "\r", "`r")
+    s := StrReplace(s, "\n", "`n")
+    s := StrReplace(s, "\\\"", """")
+    s := StrReplace(s, "\\", "\")
+    return s
+}
+
+JsStr(s) {
+    s := StrReplace(s, "\", "\\")
+    s := StrReplace(s, "`r", "")
+    s := StrReplace(s, "`n", "\n")
+    s := StrReplace(s, """", "\""")
+    return """" . s . """"
 }
 
 ReadCourtId(identityPath, baysPath) {

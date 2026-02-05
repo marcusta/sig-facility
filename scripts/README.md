@@ -116,16 +116,11 @@ AutoHotkey scripts for automated GSPro startup and window management:
 
 Booking information display system:
 
-**download-file.ps1**
-- Downloads current booking image from API
-- URL: `popupImageUrl` from config (per-bay)
-- Saves to: `C:\start\popup\dialog-image.jpg`
-- Deletes old image first to ensure fresh download
-- Should run before showing popup
-
-**download-show-dialog.ahk**
-- Combined script: downloads image and displays dialog
-- Calls download-file.ps1 then shows the image
+**Booking overlay (WebView2)**
+- Driven by `scripts/gspro-automation/gspro-start-v2.ahk` via `OverlayManager`
+- Polls `GET /bookings/matchi-courts/{matchiCourtId}/show-message` every 60s
+- Renders HTML from `scripts/overlay/pages/booking.html`
+- Suppressed during startup, help overlay, and recovery to avoid conflicts
 
 **show-popup-alt.ahk**
 - Alternative popup display method
@@ -191,7 +186,7 @@ GSPro license file (`gsp.lic`) should be deployed separately:
 
 ### Per-Bay Customization
 Scripts can be customized per-bay using `config/bays.json`:
-- Different popup URLs (booking images)
+- Matchi court IDs for booking overlay
 - Different network drive letters
 - Different sync intervals
 - Bay-specific settings and hardware flags

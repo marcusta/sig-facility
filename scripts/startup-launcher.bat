@@ -31,9 +31,6 @@ if exist "%SHORTCUT_MASTER%" copy "%SHORTCUT_MASTER%" "%SHORTCUT_DESKTOP%" >nul
 echo Starting monitoring...
 start /min powershell.exe -ExecutionPolicy Bypass -File "%REPO%\scripts\monitoring\check-status.ps1"
 
-echo Starting booking popup...
-start "" "%REPO%\scripts\popup\download-show-dialog.ahk"
-
 REM Write config flags for AHK scripts
 powershell.exe -ExecutionPolicy Bypass -Command ". '%REPO%\lib\Config.ps1'; $c = Get-SimGolfConfig; if ($c.hasRelay -eq $false) { Set-Content 'C:\SimGolf\no-relay' '' -Force } else { Remove-Item 'C:\SimGolf\no-relay' -Force -ErrorAction SilentlyContinue }"
 

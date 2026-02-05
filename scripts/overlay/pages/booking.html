@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sweden Indoor Golf - Bokning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #eab308;
+      --bg: #020617;
+      --bg-secondary: #0f172a;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e293b;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      font-family: "Outfit", sans-serif;
+      background: transparent;
+      color: var(--text-primary);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    @keyframes lineGrow { from { height: 0; opacity: 0; } to { height: 70px; opacity: 1; } }
+
+    @keyframes drift {
+      0%   { transform: scale(1.06) translate(0, 0); }
+      50%  { transform: scale(1.10) translate(-0.8%, -0.4%); }
+      100% { transform: scale(1.06) translate(0, 0); }
+    }
+
+    @keyframes lineShimmer {
+      0%       { top: -30%; opacity: 0; }
+      5%       { opacity: 1; }
+      40%      { top: 110%; opacity: 0; }
+      100%     { top: 110%; opacity: 0; }
+    }
+
+    @keyframes titleSheen {
+      0%, 25%  { background-position: 100% 0; }
+      55%, 100% { background-position: -50% 0; }
+    }
+
+    .card {
+      width: 1200px;
+      height: 840px;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      background-image: url("images/portrush.png");
+      background-size: cover;
+      background-position: center 40%;
+      animation: drift 30s ease-in-out infinite;
+      z-index: 0;
+    }
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        108deg,
+        rgba(2,6,23,0.95) 0%,
+        rgba(2,6,23,0.9) 28%,
+        rgba(2,6,23,0.5) 55%,
+        rgba(2,6,23,0.18) 100%
+      );
+    }
+
+    .glow {
+      position: absolute;
+      top: -120px;
+      left: -120px;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(234,179,8,0.13), transparent 65%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .topbar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 2.25rem;
+      z-index: 2;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .topbar::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 10%, rgba(234,179,8,0.2), transparent 90%);
+    }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand img { height: 30px; width: auto; }
+    .brand span { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.06em; }
+    .brand .accent { color: var(--primary); }
+
+    .main { flex: 1; display: flex; z-index: 2; position: relative; }
+
+    .info {
+      flex: 1;
+      padding: 2.5rem 3.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: stretch;
+      gap: 1.25rem;
+    }
+    .accent-line {
+      width: 3px;
+      background: linear-gradient(to bottom, var(--primary), rgba(234,179,8,0.2));
+      border-radius: 2px;
+      flex-shrink: 0;
+      animation: lineGrow 0.8s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    .accent-line::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 30%;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.8), transparent);
+      animation: lineShimmer 4s ease-in-out 1s infinite;
+    }
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .title {
+      font-size: 3.8rem;
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      background: linear-gradient(
+        105deg,
+        var(--text-primary) 0%,
+        var(--text-primary) 40%,
+        #fef3c7 48%,
+        var(--primary) 50%,
+        #fef3c7 52%,
+        var(--text-primary) 60%,
+        var(--text-primary) 100%
+      );
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: titleSheen 6s ease-in-out 1.5s infinite;
+    }
+    .subtitle { font-size: 1.5rem; color: var(--text-secondary); font-weight: 400; }
+    .slogan { font-size: 1.3rem; color: var(--text-muted); font-style: italic; font-weight: 300; min-height: 1.5em; }
+    .course-line { font-size: 1.3rem; font-weight: 500; min-height: 1.5em; }
+    .meta { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.35rem; }
+    .time-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 999px;
+      background: rgba(234,179,8,0.1);
+      border: 1px solid rgba(234,179,8,0.35);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #fef3c7;
+    }
+    .time-pill .lbl { font-weight: 500; color: #fde68a; opacity: 0.8; }
+    .chip {
+      padding: 0.4rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.7);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .chip.green { color: var(--green); border-color: rgba(34,197,94,0.5); }
+    .chip.red { color: var(--red); border-color: rgba(239,68,68,0.5); }
+
+    .video-area {
+      width: 380px;
+      padding: 1.5rem 2rem 1.5rem 0;
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    body.video-on .video-area { display: flex; }
+    .video-frame {
+      flex: 1;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #000;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.45);
+    }
+    .video-frame video { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .video-caption { font-size: 1rem; color: var(--text-muted); text-align: center; line-height: 1.4; }
+
+    .footer {
+      padding: 0.85rem 2.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+      position: relative;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer .hint { color: var(--text-muted); font-size: 1rem; }
+    .footer .type-label { color: var(--text-muted); font-size: 0.85rem; opacity: 0.4; }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="bg"></div>
+    <div class="glow"></div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="images/logo.png" alt="Sweden Indoor Golf">
+        <span>SWEDEN <span class="accent">INDOOR GOLF</span></span>
+      </div>
+    </div>
+    <div class="main">
+      <div class="info">
+        <div class="title-row">
+          <div class="accent-line"></div>
+          <div class="title-group">
+            <div class="title" id="title">Välkommen!</div>
+            <div class="subtitle" id="subtitle">Din bokning är igång.</div>
+          </div>
+        </div>
+        <div class="slogan" id="slogan"></div>
+        <div class="course-line" id="course-line"></div>
+        <div class="meta">
+          <div class="time-pill">
+            <span class="lbl">Tid</span>
+            <span id="time">18:00 – 19:00</span>
+          </div>
+          <div id="chips" style="display:flex;gap:0.75rem;"></div>
+        </div>
+      </div>
+      <div class="video-area">
+        <div class="video-frame">
+          <video autoplay muted loop playsinline id="start-video">
+            <source src="images/sig-start.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="video-caption">
+          Ny här? Slå några provslag och hitta rytmen.
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="hint">Tryck var som helst för att stänga</div>
+      <div class="type-label" id="type-label">welcome</div>
+    </div>
+  </div>
+
+  <script>
+    var beginnerPhrases = [
+      "Ta det lugnt, vi fixar resten.",
+      "Här börjar en riktigt skön runda.",
+      "Små steg, stora leenden.",
+      "Slå fritt, ha kul, njut av spelet.",
+      "Det viktigaste är att du trivs.",
+      "Vi hejar på dig från första slaget.",
+      "Dagens mål: en härlig upplevelse."
+    ];
+
+    var advancedPhrases = [
+      "Dax för en bra runda.",
+      "Sätt tonen tidigt.",
+      "Stabilt tempo, vassa slag.",
+      "Kör på – det här blir din runda.",
+      "Mjuk sving, hårt resultat.",
+      "Lägg ribban högt.",
+      "Idag jagar vi flaggor.",
+      "Siktet är satt, nu kör vi.",
+      "Om det flyger, räknas det.",
+      "Fairway först, show sen.",
+      "Gör det enkelt och gör det bra.",
+      "Noll dubbel, maximal glädje.",
+      "Ställ in sikte, ställ in läge.",
+      "Det är nu det händer.",
+      "Dags att leverera.",
+      "Snygga slag, snabba rundor.",
+      "Låt bollen prata.",
+      "Kom igen nu – fira varje birdie."
+    ];
+
+    var coursePhrases = [
+      "Idag borde du testa {course}.",
+      "Dagens bana: {course}.",
+      "Vi föreslår {course} idag.",
+      "Känns som en runda på {course}.",
+      "Ge {course} en chans idag."
+    ];
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function setMessage(type, customerName, startTime, endTime, level, courseSuggestion) {
+      var title = document.getElementById("title");
+      var subtitle = document.getElementById("subtitle");
+      var slogan = document.getElementById("slogan");
+      var courseLine = document.getElementById("course-line");
+      var time = document.getElementById("time");
+      var typeLabel = document.getElementById("type-label");
+      var chips = document.getElementById("chips");
+
+      typeLabel.textContent = type || "";
+
+      if (type === "welcome") {
+        title.textContent = customerName ? "Välkommen " + customerName + "!" : "Välkommen!";
+        subtitle.textContent = "Din bokning är igång.";
+      } else if (type === "ending-booked") {
+        title.textContent = "Tiden går snart ut";
+        subtitle.textContent = "Banan är bokad efter er.";
+      } else if (type === "ending-free") {
+        title.textContent = "Tiden går snart ut";
+        subtitle.textContent = "Nästa slot är ledig.";
+      } else {
+        title.textContent = "Information";
+        subtitle.textContent = "";
+      }
+
+      time.textContent = (startTime || "?") + " – " + (endTime || "?");
+
+      chips.innerHTML = "";
+      if (type === "ending-booked") {
+        chips.appendChild(makeChip("Bokad efteråt", "red"));
+      } else if (type === "ending-free") {
+        chips.appendChild(makeChip("Ledigt efteråt", "green"));
+      }
+
+      var isBeginner = (level || "").toLowerCase() === "beginner";
+      slogan.textContent = pick(isBeginner ? beginnerPhrases : advancedPhrases);
+      if (courseSuggestion) {
+        courseLine.textContent = pick(coursePhrases).replace("{course}", courseSuggestion);
+      } else {
+        courseLine.textContent = "";
+      }
+
+      if (isBeginner) {
+        document.body.classList.add("video-on");
+      } else {
+        document.body.classList.remove("video-on");
+      }
+    }
+
+    function makeChip(text, tone) {
+      var el = document.createElement("div");
+      el.className = "chip " + (tone || "");
+      el.textContent = text;
+      return el;
+    }
+
+    function getParam(name) {
+      var params = new URLSearchParams(window.location.search || "");
+      var value = params.get(name);
+      if (value !== null && value !== "") return value;
+      if (window.location.hash && window.location.hash.length > 1) {
+        var hashParams = new URLSearchParams(window.location.hash.substring(1));
+        var hashValue = hashParams.get(name);
+        if (hashValue !== null && hashValue !== "") return hashValue;
+      }
+      return "";
+    }
+
+    (function applyDebugParams() {
+      var type = getParam("type");
+      var name = getParam("name");
+      var start = getParam("start");
+      var end = getParam("end");
+      var level = getParam("level");
+      var course = getParam("course");
+      if (type || name || start || end || level || course) {
+        setMessage(
+          type || "welcome",
+          name || "",
+          start || "18:00",
+          end || "19:00",
+          level || "",
+          course || ""
+        );
+      }
+    })();
+
+    document.getElementById("card").addEventListener("click", function() {
+      if (window.chrome && window.chrome.webview) {
+        window.chrome.webview.postMessage("booking-close");
+      }
+    });
+  </script>
+</body>
+</html>

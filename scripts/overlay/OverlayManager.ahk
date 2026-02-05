@@ -3,6 +3,7 @@
 #Include "StartupOverlay.ahk"
 #Include "HelpButton.ahk"
 #Include "HelpOverlay.ahk"
+#Include "BookingOverlay.ahk"
 
 /**
  * OverlayManager -- registry of overlays, z-order, cleanup.
@@ -16,6 +17,7 @@ class OverlayManager {
     _startup := ""
     _helpBtn := ""
     _helpOv := ""
+    _booking := ""
 
     /**
      * @param {String} bayId  e.g. "BAY03"
@@ -35,6 +37,7 @@ class OverlayManager {
         this._helpOv := HelpOverlay(this)
         this._helpOv.Init()
         this._helpBtn := HelpButton(this, ObjBindMethod(this, "_onHelpClick"))
+        this._booking := BookingOverlay(this)
     }
 
     /**
@@ -66,6 +69,20 @@ class OverlayManager {
         this._helpBtn.SetAlert(active)
     }
 
+    ShowBookingMessage(jsonBody) {
+        if this._booking
+            this._booking.ShowMessage(jsonBody)
+    }
+
+    HideBooking() {
+        if this._booking
+            this._booking.Hide()
+    }
+
+    IsBookingOpen() {
+        return this._booking ? this._booking.IsOpen() : false
+    }
+
     /**
      * Destroy all overlays (call in CleanupAndExit).
      */
@@ -73,6 +90,7 @@ class OverlayManager {
         this._startup.Destroy()
         this._helpBtn.Destroy()
         this._helpOv.Destroy()
+        this._booking.Destroy()
     }
 
     /**
@@ -82,9 +100,19 @@ class OverlayManager {
         return this._pagesDir
     }
 
+    IsHelpOpen() {
+        return this._helpOv ? this._helpOv.IsOpen() : false
+    }
+
+    IsStartupActive() {
+        return this._startup ? this._startup.IsActive() : false
+    }
+
     ; --- internal callbacks ---
 
     _onHelpClick() {
+        if this._booking
+            this._booking.Hide()
         this._helpOv.Toggle()
     }
 }

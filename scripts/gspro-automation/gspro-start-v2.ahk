@@ -44,6 +44,7 @@ global DEBOUNCE_SAMPLES := 3  ; Require N consecutive samples before acting
 global SIGNAL_SAMPLE_MS := 250  ; Sample signals every 250ms
 global UI_ENFORCE_MS    := 2000  ; UI enforcement every 2s
 global BLINK_TICK_MS    := 150   ; Blink engine tick rate
+global BOOKING_POLL_MS  := 60000 ; Booking message poll interval
 
 ; ##################################################################
 ; STATE MACHINE
@@ -98,6 +99,13 @@ class IndicatorMode {
 global currentIndicatorMode := IndicatorMode.SolidRed
 global blinkState := false  ; Current on/off state for blinking
 global blinkStep := 0       ; Step counter for complex patterns
+
+; ##################################################################
+; BOOKING OVERLAY
+; ##################################################################
+
+global bookingPollEnabled := false
+global bookingUrl := ""
 
 ; ##################################################################
 ; USB RELAY
@@ -244,6 +252,7 @@ try {
 }
 if !OverlayMgr
     LogStatus("Warning: Could not read bay identity for overlay")
+InitBooking()
 
 ; Show startup overlay before boot sequence
 if OverlayMgr
@@ -374,6 +383,9 @@ StartTimers() {
 
     ; Recovery state machine timer (runs when recovering)
     SetTimer(RecoveryTick, 500)
+
+    ; Booking message polling (suppressed during startup/recovery/help)
+    SetTimer(BookingPollTick, BOOKING_POLL_MS)
 }
 
 ; ##################################################################
@@ -1040,6 +1052,7 @@ CleanupAndExit() {
     SetTimer(UIEnforcementTick, 0)
     SetTimer(BlinkEngineTick, 0)
     SetTimer(RecoveryTick, 0)
+    SetTimer(BookingPollTick, 0)
 
     if OverlayMgr
         OverlayMgr.Cleanup()
@@ -1053,6 +1066,69 @@ CleanupAndExit() {
     if WinExist(REPLICA_WINDOW)
         WinClose(REPLICA_WINDOW)
     ExitApp()
+}
+
+; ##################################################################
+; BOOKING POLLING
+; ##################################################################
+
+InitBooking() {
+    global bookingPollEnabled, bookingUrl
+
+    matchiCourtId := ReadMatchiCourtId("C:\SimGolf\bay-identity.json", "C:\SimGolf\sig-facility\config\bays.json")
+    if !matchiCourtId {
+        LogStatus("Booking overlay disabled (missing matchiCourtId)")
+        return
+    }
+
+    bookingUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message"
+    bookingPollEnabled := true
+}
+
+BookingPollTick() {
+    global bookingPollEnabled, bookingUrl
+
+    if !bookingPollEnabled || !OverlayMgr
+        return
+
+    if OverlayMgr.IsStartupActive() || OverlayMgr.IsHelpOpen() || SystemState.isRecovering || SystemState.isRestarting {
+        OverlayMgr.HideBooking()
+        return
+    }
+
+    res := FetchBookingMessage(bookingUrl)
+    if (res.status = 200 && res.body != "") {
+        OverlayMgr.ShowBookingMessage(res.body)
+    } else {
+        OverlayMgr.HideBooking()
+    }
+}
+
+FetchBookingMessage(url) {
+    try {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", url, false)
+        whr.Send()
+        return { status: whr.Status, body: whr.ResponseText }
+    } catch {
+        return { status: 0, body: "" }
+    }
+}
+
+ReadMatchiCourtId(identityPath, baysPath) {
+    if !FileExist(identityPath) || !FileExist(baysPath)
+        return 0
+
+    identityJson := FileRead(identityPath)
+    if !RegExMatch(identityJson, '"bayId"\s*:\s*"(\w+)"', &m)
+        return 0
+    bayId := m[1]
+
+    baysJson := FileRead(baysPath)
+    if !RegExMatch(baysJson, '"' bayId '"\s*:\s*\{[^}]*"matchiCourtId"\s*:\s*(\d+)', &m2)
+        return 0
+
+    return m2[1]
 }
 
 ; ##################################################################
