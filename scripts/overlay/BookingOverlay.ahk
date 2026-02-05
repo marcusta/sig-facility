@@ -86,7 +86,7 @@ class BookingOverlay {
         s := StrReplace(s, "\/", "/")
         s := StrReplace(s, "\r", "`r")
         s := StrReplace(s, "\n", "`n")
-        s := StrReplace(s, "\\\"", """")
+        s := StrReplace(s, '\"', '"')
         s := StrReplace(s, "\\", "\")
         return s
     }
@@ -95,7 +95,7 @@ class BookingOverlay {
         s := StrReplace(s, "\", "\\")
         s := StrReplace(s, "`r", "")
         s := StrReplace(s, "`n", "\n")
-        s := StrReplace(s, """", "\""")
-        return """" . s . """"
+        s := StrReplace(s, '"', '\"')
+        return '"' . s . '"'
     }
 }
