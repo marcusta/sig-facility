@@ -368,6 +368,9 @@ OpenVisualDataAndSetup() {
     if OverlayMgr
         OverlayMgr.ShowHelpButton()
 
+    ; Startup is complete here, so trigger a one-shot booking poll now.
+    SetTimer(BookingPollTick, -300)
+
     LogStatus("System Ready")
 }
 
@@ -869,6 +872,9 @@ EndRecovery() {
     if WinExist(GAME_WINDOW)
         WinActivate(GAME_WINDOW)
 
+    ; Recovery ended, allow a fresh booking poll immediately.
+    SetTimer(BookingPollTick, -300)
+
     LogStatus("Recovery ended")
 }
 
@@ -1083,6 +1089,7 @@ InitBooking() {
 
     bookingUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message?debug=1"
     bookingPollEnabled := true
+    LogStatus("Booking overlay enabled for court " . matchiCourtId)
 }
 
 BookingPollTick() {
@@ -1091,12 +1098,14 @@ BookingPollTick() {
     if !bookingPollEnabled || !OverlayMgr
         return
 
-    ; Skip polling during startup/recovery but never auto-hide
+    ; Always suppress during startup/recovery/restart to avoid UI interference.
     if OverlayMgr.IsStartupActive() || SystemState.isRecovering || SystemState.isRestarting
         return
 
     res := FetchBookingMessage(bookingUrl)
     if (res.status = 200 && res.body != "") {
+        if !InStr(res.body, '"type"')
+            LogStatus("Booking poll returned JSON without type field")
         OverlayMgr.ShowBookingMessage(res.body)
     }
 }
