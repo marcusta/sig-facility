@@ -27,6 +27,7 @@ $SupervisorRunningPath = "C:\SimGolf\supervisor.ps1"
 $CheckIntervalSeconds = 1800  # 30 minutes
 $LogPath = "C:\SimGolf\logs"
 $LogFile = "$LogPath\supervisor-$(Get-Date -Format 'yyyy-MM-dd').log"
+$DevModeLockFile = "C:\SimGolf\dev-mode-active"
 
 # Ensure log directory exists
 if (-not (Test-Path $LogPath)) {
@@ -89,6 +90,12 @@ function Update-Repository {
 
     try {
         Push-Location $Path
+
+        if (Test-Path $DevModeLockFile) {
+            Write-Log "Dev mode lock detected at $DevModeLockFile - skipping branch enforcement and git pull" -Level "INFO"
+            Pop-Location
+            return $false
+        }
 
         # Ensure we're on main branch (could be on a dev branch after unclean shutdown)
         $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null

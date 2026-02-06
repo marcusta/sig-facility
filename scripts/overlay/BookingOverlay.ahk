@@ -45,7 +45,7 @@ class BookingOverlay {
             ; Page not loaded yet -- defer script until "booking-ready"
             this._pendingScript := script
         } else if !this._overlay.IsVisible {
-            this._overlay.Show()
+            this._overlay.Show("")
             this._overlay.ExecuteScript(script)
         } else {
             ; Already visible -- replace content

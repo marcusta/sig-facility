@@ -4,6 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$devModeLockFile = "C:\SimGolf\dev-mode-active"
 
 Push-Location $repoRoot
 try {
@@ -69,6 +70,7 @@ try {
     Write-Host "Branch: $Branch"
     Write-Host "Polling every 5 seconds. Press Ctrl+C to exit."
     Write-Host ""
+    Set-Content -Path $devModeLockFile -Value "branch=$Branch`nstarted=$(Get-Date -Format o)" -Force
 
     $lastCommit = git rev-parse HEAD
 
@@ -95,6 +97,9 @@ try {
     } finally {
         Write-Host ""
         Write-Host "=== EXITING DEV MODE ===" -ForegroundColor Yellow
+        if (Test-Path $devModeLockFile) {
+            Remove-Item $devModeLockFile -Force -ErrorAction SilentlyContinue
+        }
         Write-Host "Switching back to main..."
         git checkout main
         git pull --ff-only
