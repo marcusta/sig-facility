@@ -1081,7 +1081,7 @@ InitBooking() {
         return
     }
 
-    bookingUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message"
+    bookingUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message?debug=1"
     bookingPollEnabled := true
 }
 

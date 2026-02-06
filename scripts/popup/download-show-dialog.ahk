@@ -18,7 +18,7 @@ if !matchiCourtId {
     ExitApp
 }
 
-downloadUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message"
+downloadUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message?debug=1"
 
 global bookingOverlay := ""
 global bookingOverlayUrl := BuildBookingPageUrl()

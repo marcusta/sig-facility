@@ -118,7 +118,7 @@ Booking information display system:
 
 **Booking overlay (WebView2)**
 - Driven by `scripts/gspro-automation/gspro-start-v2.ahk` via `OverlayManager`
-- Polls `GET /bookings/matchi-courts/{matchiCourtId}/show-message` every 60s
+- Polls `GET /bookings/matchi-courts/{matchiCourtId}/show-message?debug=1` every 60s
 - Renders HTML from `scripts/overlay/pages/booking.html`
 - Suppressed during startup, help overlay, and recovery to avoid conflicts
 
