@@ -57,7 +57,7 @@ ShowMessage(jsonBody) {
 
     if !bookingOverlay {
         bookingOverlay := Overlay()
-        bookingOverlay.Show("", {w: OVERLAY_W, h: OVERLAY_H, x: OVERLAY_X, y: OVERLAY_Y})
+        bookingOverlay.Show("", { w: OVERLAY_W, h: OVERLAY_H, x: OVERLAY_X, y: OVERLAY_Y, cornerRadius: 18 })
         bookingOverlay.OnMessage(Func("_OnBookingMessage"))
         bookingOverlay.Navigate(bookingOverlayUrl)
     } else if !bookingOverlay.IsVisible {
@@ -65,12 +65,12 @@ ShowMessage(jsonBody) {
     }
 
     script := "setMessage(" . _
-        JsStr(msg.type) . "," . _
-        JsStr(msg.customerName) . "," . _
-        JsStr(msg.startTime) . "," . _
-        JsStr(msg.endTime) . "," . _
-        JsStr(msg.level) . "," . _
-        JsStr(msg.courseSuggestion) . ")"
+    JsStr(msg.type) . "," . _
+    JsStr(msg.customerName) . "," . _
+    JsStr(msg.startTime) . "," . _
+    JsStr(msg.endTime) . "," . _
+    JsStr(msg.level) . "," . _
+    JsStr(msg.courseSuggestion) . ")"
     bookingOverlay.ExecuteScript(script)
 }
 
@@ -112,36 +112,36 @@ UnescapeJson(s) {
     s := StrReplace(s, "\/", "/")
     s := StrReplace(s, "\r", "`r")
     s := StrReplace(s, "\n", "`n")
-    s := StrReplace(s, "\\\"", """")
-    s := StrReplace(s, "\\", "\")
-    return s
-}
+    s := StrReplace(s, "\\\" ", " "" ")
+        s := StrReplace(s, "\\", "\")
+        return s
+    }
 
-JsStr(s) {
-    s := StrReplace(s, "\", "\\")
-    s := StrReplace(s, "`r", "")
-    s := StrReplace(s, "`n", "\n")
-    s := StrReplace(s, """", "\""")
-    return """" . s . """"
-}
+    JsStr(s) {
+        s := StrReplace(s, "\", "\\")
+        s := StrReplace(s, "`r", "")
+        s := StrReplace(s, "`n", "\n")
+        s := StrReplace(s, "" "", "\" "")
+        return "" "" . s . "" ""
+    }
 
-ReadCourtId(identityPath, baysPath) {
-    if !FileExist(identityPath) || !FileExist(baysPath)
-        return 0
+    ReadCourtId(identityPath, baysPath) {
+        if !FileExist(identityPath) || !FileExist(baysPath)
+            return 0
 
-    ; Read bay identity
-    identityJson := FileRead(identityPath)
-    if !RegExMatch(identityJson, '"bayId"\s*:\s*"(\w+)"', &m)
-        return 0
-    bayId := m[1]
+        ; Read bay identity
+        identityJson := FileRead(identityPath)
+        if !RegExMatch(identityJson, '"bayId"\s*:\s*"(\w+)"', &m)
+            return 0
+        bayId := m[1]
 
-    ; Read bays.json and find the matchiCourtId for this bay
-    baysJson := FileRead(baysPath)
+        ; Read bays.json and find the matchiCourtId for this bay
+        baysJson := FileRead(baysPath)
 
-    ; Find the section for this bay and extract matchiCourtId
-    ; Pattern: "BAYxx": { ... "matchiCourtId": NNN ... }
-    if !RegExMatch(baysJson, '"' bayId '"\s*:\s*\{[^}]*"matchiCourtId"\s*:\s*(\d+)', &m2)
-        return 0
+        ; Find the section for this bay and extract matchiCourtId
+        ; Pattern: "BAYxx": { ... "matchiCourtId": NNN ... }
+        if !RegExMatch(baysJson, '"' bayId '"\s*:\s*\{[^}]*"matchiCourtId"\s*:\s*(\d+)', &m2)
+            return 0
 
-    return m2[1]
-}
+        return m2[1]
+    }
