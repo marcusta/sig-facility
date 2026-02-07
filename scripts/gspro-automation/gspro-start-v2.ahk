@@ -283,7 +283,7 @@ if gsproAlreadyRunning {
     if OverlayMgr
         OverlayMgr.ShowHelpButton()
     StartTimers()
-    SetTimer(BookingPollTick, -300)
+    BookingPollTick()
     LogStatus("System Ready (attached)")
 } else {
     ; Normal mode: full boot sequence with startup overlay
@@ -407,7 +407,7 @@ OpenVisualDataAndSetup() {
         OverlayMgr.ShowHelpButton()
 
     ; Startup is complete here, so trigger a one-shot booking poll now.
-    SetTimer(BookingPollTick, -300)
+    BookingPollTick()
 
     LogStatus("System Ready")
 }
@@ -911,7 +911,7 @@ EndRecovery() {
         WinActivate(GAME_WINDOW)
 
     ; Recovery ended, allow a fresh booking poll immediately.
-    SetTimer(BookingPollTick, -300)
+    BookingPollTick()
 
     LogStatus("Recovery ended")
 }
@@ -1148,7 +1148,7 @@ BookingPollTick() {
         return
     }
 
-    LogStatus("Booking poll: fetching...", false)
+    LogStatus("Booking poll: " . bookingUrl, false)
     res := FetchBookingMessage(bookingUrl)
     LogStatus("Booking poll: status=" . res.status . " body=" . SubStr(res.body, 1, 120), false)
     if (res.status = 200 && res.body != "") {
