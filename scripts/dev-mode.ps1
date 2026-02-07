@@ -34,7 +34,7 @@ try {
     # Stop the supervisor so it doesn't interfere.
     # Use Win32_Process for reliable CommandLine access on Windows PowerShell.
     $supervisorProcess = Get-CimInstance Win32_Process -Filter "Name='powershell.exe' OR Name='pwsh.exe'" |
-        Where-Object { $_.CommandLine -match '(^|\\)supervisor\.ps1(\s|$|")' }
+        Where-Object { $_.CommandLine -match 'supervisor\.ps1' }
     if ($supervisorProcess) {
         Write-Host "Stopping supervisor..." -ForegroundColor Yellow
         $supervisorProcess | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
