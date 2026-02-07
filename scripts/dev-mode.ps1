@@ -31,13 +31,13 @@ try {
         exit 1
     }
 
-    # Stop the supervisor so it doesn't interfere
-    $supervisorProcess = Get-Process -Name pwsh, powershell -ErrorAction SilentlyContinue | Where-Object {
-        $_.CommandLine -like "*supervisor.ps1*"
-    }
+    # Stop the supervisor so it doesn't interfere.
+    # Use Win32_Process for reliable CommandLine access on Windows PowerShell.
+    $supervisorProcess = Get-CimInstance Win32_Process -Filter "Name='powershell.exe' OR Name='pwsh.exe'" |
+        Where-Object { $_.CommandLine -match '(^|\\)supervisor\.ps1(\s|$|")' }
     if ($supervisorProcess) {
         Write-Host "Stopping supervisor..." -ForegroundColor Yellow
-        $supervisorProcess | Stop-Process -Force
+        $supervisorProcess | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
         Start-Sleep -Seconds 2
         Write-Host "Supervisor stopped." -ForegroundColor Green
     } else {

@@ -47,6 +47,18 @@ global BLINK_TICK_MS    := 150   ; Blink engine tick rate
 global BOOKING_POLL_MS  := 60000 ; Booking message poll interval
 
 ; ##################################################################
+; CLI FLAGS
+; ##################################################################
+
+global debugMode := false
+for arg in A_Args {
+    if (arg = "--debug")
+        debugMode := true
+}
+if debugMode
+    BOOKING_POLL_MS := 15000
+
+; ##################################################################
 ; STATE MACHINE
 ; ##################################################################
 
@@ -254,29 +266,55 @@ if !OverlayMgr
     LogStatus("Warning: Could not read bay identity for overlay")
 InitBooking()
 
-; Show startup overlay before boot sequence
-if OverlayMgr
-    OverlayMgr.ShowStartup()
+; Detect whether GSPro is already running before launch
+global gsproAlreadyRunning := WinExist(GAME_WINDOW) ? true : false
+global startupComplete := false
+global setupComplete := false
+global startupStableSince := 0
 
-InitializeSystem()
-StartTimers()
+if debugMode
+    LogStatus("Debug mode: booking poll " . BOOKING_POLL_MS . "ms")
+
+if gsproAlreadyRunning {
+    ; Attach mode: skip entire boot sequence, go straight to ready
+    InitializeSystem()
+    startupComplete := true
+    setupComplete := true
+    if OverlayMgr
+        OverlayMgr.ShowHelpButton()
+    StartTimers()
+    SetTimer(BookingPollTick, -300)
+    LogStatus("System Ready (attached)")
+} else {
+    ; Normal mode: full boot sequence with startup overlay
+    if OverlayMgr
+        OverlayMgr.ShowStartup()
+    InitializeSystem()
+    StartTimers()
+}
 
 InitializeSystem() {
-    RunWait(SETTINGS_BAT, , "Hide")
-    Run(GSP_PATH)
+    if gsproAlreadyRunning {
+        LogStatus("GSPro already running - attaching")
+    } else {
+        RunWait(SETTINGS_BAT, , "Hide")
+        Run(GSP_PATH)
+    }
 
-    LogStatus("Waiting for Connector...")
-    if !WinWait(CONNECTOR_WINDOW, , 60) {
-        LogStatus("Connector window not found!")
-        return
+    if WinExist(CONNECTOR_WINDOW) {
+        if gsproAlreadyRunning
+            LogStatus("Connector already present")
+    } else {
+        LogStatus("Waiting for Connector...")
+        if !WinWait(CONNECTOR_WINDOW, , 60) {
+            LogStatus("Connector window not found!")
+            return
+        }
     }
 
     LogStatus("Connector found, waiting for connection...")
 }
 
-global startupComplete := false
-global setupComplete := false
-global startupStableSince := 0
 CheckStartupComplete() {
     global startupComplete, startupStableSince
     if startupComplete

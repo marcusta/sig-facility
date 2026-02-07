@@ -53,7 +53,8 @@ class Overlay {
 
         ; Create WebView2 synchronously inside the GUI (each instance gets its own data dir)
         dataDir := A_Temp . "\sig-overlay-" . this._instanceId
-        wvc := WebView2.create(g.Hwnd, , , dataDir, , {AdditionalBrowserArguments: "--autoplay-policy=no-user-gesture-required"})
+        dllPath := A_LineFile "\..\..\..\lib\ahk\WebView2\64bit\WebView2Loader.dll"
+        wvc := WebView2.create(g.Hwnd, , , dataDir, , {AdditionalBrowserArguments: "--autoplay-policy=no-user-gesture-required"}, dllPath)
         this.wvc := wvc
         this.wv := wvc.CoreWebView2
 
