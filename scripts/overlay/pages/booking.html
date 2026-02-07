@@ -234,6 +234,31 @@
     .video-frame video { width: 100%; height: 100%; object-fit: contain; display: block; }
     .video-caption { font-size: 1rem; color: var(--text-muted); text-align: center; line-height: 1.4; }
 
+    .qr-area {
+      width: 280px;
+      padding: 1.5rem 2rem 1.5rem 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    body.qr-on .qr-area { display: flex; }
+    .qr-frame {
+      width: 200px;
+      height: 200px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.45);
+    }
+    .qr-frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .qr-caption { font-size: 1rem; color: var(--text-muted); text-align: center; line-height: 1.4; }
+
     .footer {
       padding: 0.85rem 2.25rem;
       display: flex;
@@ -286,6 +311,12 @@
           Ny här? Slå några provslag och hitta rytmen.
         </div>
       </div>
+      <div class="qr-area">
+        <div class="qr-frame">
+          <img id="qr-img" src="" alt="QR">
+        </div>
+        <div class="qr-caption">Skanna för att boka mer tid</div>
+      </div>
     </div>
     <div class="footer">
       <div class="hint">Tryck var som helst för att stänga</div>
@@ -333,6 +364,20 @@
       "Ge {course} en chans idag."
     ];
 
+    var endingFreePhrases = [
+      "Tack för besöket, välkommen tillbaka!",
+      "Nästa slot är ledig om ni vill fortsätta.",
+      "Bra runda! Boka direkt om ni vill spela mer.",
+      "Hoppas ni hade det bra!"
+    ];
+
+    var endingBookedPhrases = [
+      "Tack för besöket, välkommen tillbaka!",
+      "Hoppas ni hade en grym runda.",
+      "Avsluta rundan och lämna banan redo.",
+      "Dags att runda av, nästa grupp väntar."
+    ];
+
     function pick(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
@@ -345,6 +390,7 @@
       var endTime = msg.endTime || "";
       var level = msg.level || "";
       var courseSuggestion = msg.courseSuggestion || "";
+      var bookingUrl = msg.bookingUrl || "";
       var title = document.getElementById("title");
       var subtitle = document.getElementById("subtitle");
       var slogan = document.getElementById("slogan");
@@ -379,17 +425,30 @@
       }
 
       var isBeginner = (level || "").toLowerCase() === "beginner";
-      slogan.textContent = pick(isBeginner ? beginnerPhrases : advancedPhrases);
-      if (courseSuggestion) {
-        courseLine.textContent = pick(coursePhrases).replace("{course}", courseSuggestion);
-      } else {
-        courseLine.textContent = "";
-      }
 
-      if (isBeginner) {
-        document.body.classList.add("video-on");
-      } else {
-        document.body.classList.remove("video-on");
+      // Reset all type-specific visuals
+      document.body.classList.remove("video-on");
+      document.body.classList.remove("qr-on");
+      slogan.textContent = "";
+      courseLine.textContent = "";
+
+      if (type === "welcome") {
+        slogan.textContent = pick(isBeginner ? beginnerPhrases : advancedPhrases);
+        if (courseSuggestion) {
+          courseLine.textContent = pick(coursePhrases).replace("{course}", courseSuggestion);
+        }
+        if (isBeginner) {
+          document.body.classList.add("video-on");
+        }
+      } else if (type === "ending-free") {
+        slogan.textContent = pick(endingFreePhrases);
+        if (bookingUrl) {
+          var qrImg = document.getElementById("qr-img");
+          qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(bookingUrl);
+          document.body.classList.add("qr-on");
+        }
+      } else if (type === "ending-booked") {
+        slogan.textContent = pick(endingBookedPhrases);
       }
     }
 
@@ -419,15 +478,17 @@
       var end = getParam("end");
       var level = getParam("level");
       var course = getParam("course");
+      var bookingUrlParam = getParam("bookingUrl");
       if (type || name || start || end || level || course) {
-        setMessage(
-          type || "welcome",
-          name || "",
-          start || "18:00",
-          end || "19:00",
-          level || "",
-          course || ""
-        );
+        setMessage(JSON.stringify({
+          type: type || "welcome",
+          customerName: name || "",
+          startTime: start || "18:00",
+          endTime: end || "19:00",
+          level: level || "",
+          courseSuggestion: course || "",
+          bookingUrl: bookingUrlParam || ""
+        }));
       }
     })();
 
