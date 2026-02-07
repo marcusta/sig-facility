@@ -48,7 +48,7 @@ class Overlay {
         ; Clip window to rounded rectangle if cornerRadius is set
         cr := options.HasOwnProp("cornerRadius") ? options.cornerRadius : 0
         if (cr > 0)
-            WinSetRegion("0-0 " w "-" h " R" cr "-" cr, g.Hwnd)
+            WinSetRegion("0-0 W" w " H" h " R" cr "-" cr, g.Hwnd)
         this.gui := g
 
         ; Create WebView2 synchronously inside the GUI (each instance gets its own data dir)
