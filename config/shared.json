@@ -6,5 +6,5 @@
   "courseSyncStagingPath": "C:\\course_staging",
 
   "statusMonitorUrl": "https://app.swedenindoorgolf.se/sig-status/status",
-  "statusMonitorIntervalSeconds": 60
+  "statusMonitorIntervalSeconds": 600
 }

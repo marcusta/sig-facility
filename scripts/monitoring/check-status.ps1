@@ -22,7 +22,7 @@ $config = Get-SimGolfConfig
 
 # Get configuration values (with fallbacks)
 $serverUrl = if ($config.statusMonitorUrl) { $config.statusMonitorUrl } else { "https://app.swedenindoorgolf.se/sig-status/status" }
-$intervalSeconds = if ($config.statusMonitorIntervalSeconds) { $config.statusMonitorIntervalSeconds } else { 60 }
+$intervalSeconds = if ($config.statusMonitorIntervalSeconds) { $config.statusMonitorIntervalSeconds } else { 600 }
 $logPath = if ($config.logPath) { $config.logPath } else { "C:\SimGolf\logs" }
 $machineName = $env:COMPUTERNAME
 $logicalBay = if ($config.logicalBay) { $config.logicalBay } else { "Unknown" }

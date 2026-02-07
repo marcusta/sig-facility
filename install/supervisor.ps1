@@ -127,11 +127,8 @@ function Update-Repository {
 # Check if background process is running
 function Test-BackgroundProcessRunning {
     # Look for PowerShell process running our background script
-    $processes = Get-Process -Name pwsh, powershell -ErrorAction SilentlyContinue | Where-Object {
-        $_.CommandLine -like "*check-status.ps1*"
-    }
-
-    return ($null -ne $processes -and $processes.Count -gt 0)
+    $processes = Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%check-status.ps1%'"
+    return ($null -ne $processes)
 }
 
 # Start the background process
@@ -183,9 +180,8 @@ function Request-BackgroundRestart {
 
     # If still running after timeout, force kill
     Write-Log "Background process did not stop gracefully, force killing" -Level "WARN"
-    Get-Process -Name pwsh, powershell -ErrorAction SilentlyContinue | Where-Object {
-        $_.CommandLine -like "*check-status.ps1*"
-    } | Stop-Process -Force
+    Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%check-status.ps1%'" |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
     Start-Sleep -Seconds 2
     return $true
