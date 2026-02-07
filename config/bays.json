@@ -31,7 +31,7 @@
   "BAY05": {
     "logicalBay": 5,
     "matchiCourtId": 2072,
-    "courseSyncDestination": "C:\\GSProV1\\Core\\GSP\\Courses",
+    "courseSyncDestination": "C:\\courses",
     "courseSyncStagingPath": "C:\\course_staging"
   },
 
