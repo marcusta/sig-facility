@@ -17,7 +17,7 @@ REM Update supervisor from repo before starting it
 if exist "%REPO%\install\supervisor.ps1" copy /Y "%REPO%\install\supervisor.ps1" "C:\SimGolf\supervisor.ps1" >nul
 
 echo Starting SimGolf supervisor...
-start /min powershell.exe -ExecutionPolicy Bypass -File "C:\SimGolf\supervisor.ps1"
+start /min powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File "C:\SimGolf\supervisor.ps1"
 
 echo Waiting for supervisor to finish initial update...
 timeout /t 30 /nobreak >nul
