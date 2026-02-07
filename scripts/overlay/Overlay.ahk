@@ -45,6 +45,10 @@ class Overlay {
         g.Show("w" w " h" h " x" x " y" y)
         if (opacity > 0 && opacity < 255)
             WinSetTransparent(opacity, g.Hwnd)
+        ; Apply Windows 11 rounded corners to the window
+        cornerPref := Buffer(4, 0)
+        NumPut("int", 2, cornerPref)  ; DWMWCP_ROUND
+        DllCall("dwmapi\DwmSetWindowAttribute", "ptr", g.Hwnd, "int", 33, "ptr", cornerPref, "int", 4)
         this.gui := g
 
         ; Create WebView2 synchronously inside the GUI (each instance gets its own data dir)
