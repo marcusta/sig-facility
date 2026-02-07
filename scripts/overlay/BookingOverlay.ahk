@@ -37,7 +37,7 @@ class BookingOverlay {
 
         if !this._overlay {
             ov := Overlay()
-            ov.Show("", {w: 1200, h: 840, x: 60, y: 120})
+            ov.Show("", {w: 1200, h: 840, x: 60, y: 120, cornerRadius: 18})
             ov.OnMessage(ObjBindMethod(this, "_onMessage"))
             url := this._overlayMgr.GetPagesDir() . "booking.html"
             ov.Navigate(url)
