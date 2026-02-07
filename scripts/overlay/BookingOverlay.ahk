@@ -23,17 +23,12 @@ class BookingOverlay {
     }
 
     ShowMessage(jsonBody) {
-        msg := this._parseMessage(jsonBody)
-        if !msg.type
-            return
-
-        script := "setMessage(" .
-            this._jsStr(msg.type) . "," .
-            this._jsStr(msg.customerName) . "," .
-            this._jsStr(msg.startTime) . "," .
-            this._jsStr(msg.endTime) . "," .
-            this._jsStr(msg.level) . "," .
-            this._jsStr(msg.courseSuggestion) . ")"
+        ; Pass raw JSON to JS for parsing -- escape for single-quoted JS string
+        escaped := StrReplace(jsonBody, "\", "\\")
+        escaped := StrReplace(escaped, "'", "\'")
+        escaped := StrReplace(escaped, "`r", "")
+        escaped := StrReplace(escaped, "`n", "\n")
+        script := "setMessage('" . escaped . "')"
 
         if !this._overlay {
             ov := Overlay()
@@ -86,37 +81,4 @@ class BookingOverlay {
         }
     }
 
-    _parseMessage(jsonBody) {
-        msg := {}
-        msg.type := this._jsonStringValue(jsonBody, "type")
-        msg.customerName := this._jsonStringValue(jsonBody, "customerName")
-        msg.startTime := this._jsonStringValue(jsonBody, "startTime")
-        msg.endTime := this._jsonStringValue(jsonBody, "endTime")
-        msg.level := this._jsonStringValue(jsonBody, "level")
-        msg.courseSuggestion := this._jsonStringValue(jsonBody, "courseSuggestion")
-        return msg
-    }
-
-    _jsonStringValue(jsonBody, key) {
-        if RegExMatch(jsonBody, '"' key '"\s*:\s*"((?:\\.|[^"])*)"', &m)
-            return this._unescapeJson(m[1])
-        return ""
-    }
-
-    _unescapeJson(s) {
-        s := StrReplace(s, "\/", "/")
-        s := StrReplace(s, "\r", "`r")
-        s := StrReplace(s, "\n", "`n")
-        s := StrReplace(s, '\"', '"')
-        s := StrReplace(s, "\\", "\")
-        return s
-    }
-
-    _jsStr(s) {
-        s := StrReplace(s, "\", "\\")
-        s := StrReplace(s, "`r", "")
-        s := StrReplace(s, "`n", "\n")
-        s := StrReplace(s, '"', '\"')
-        return '"' . s . '"'
-    }
 }

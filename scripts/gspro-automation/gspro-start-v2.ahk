@@ -1151,11 +1151,8 @@ BookingPollTick() {
     LogStatus("Booking poll: " . bookingUrl, false)
     res := FetchBookingMessage(bookingUrl)
     LogStatus("Booking poll: status=" . res.status . " body=" . SubStr(res.body, 1, 120), false)
-    if (res.status = 200 && res.body != "") {
-        if !InStr(res.body, '"type"')
-            LogStatus("Booking poll: JSON missing type field")
+    if (res.status = 200 && res.body != "")
         OverlayMgr.ShowBookingMessage(res.body)
-    }
 }
 
 FetchBookingMessage(url) {

@@ -337,7 +337,14 @@
       return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    function setMessage(type, customerName, startTime, endTime, level, courseSuggestion) {
+    function setMessage(jsonStr) {
+      var msg = JSON.parse(jsonStr);
+      var type = msg.type || "";
+      var customerName = msg.customerName || "";
+      var startTime = msg.startTime || "";
+      var endTime = msg.endTime || "";
+      var level = msg.level || "";
+      var courseSuggestion = msg.courseSuggestion || "";
       var title = document.getElementById("title");
       var subtitle = document.getElementById("subtitle");
       var slogan = document.getElementById("slogan");
