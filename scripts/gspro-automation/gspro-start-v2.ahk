@@ -1125,7 +1125,9 @@ InitBooking() {
         return
     }
 
-    bookingUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message?debug=1"
+    bookingUrl := "https://app.swedenindoorgolf.se/bookings/matchi-courts/" matchiCourtId "/show-message"
+    if debugMode
+        bookingUrl .= "?debug=1"
     bookingPollEnabled := true
     LogStatus("Booking overlay enabled for court " . matchiCourtId)
 }
@@ -1137,13 +1139,21 @@ BookingPollTick() {
         return
 
     ; Always suppress during startup/recovery/restart to avoid UI interference.
-    if OverlayMgr.IsStartupActive() || SystemState.isRecovering || SystemState.isRestarting
+    if OverlayMgr.IsStartupActive() {
+        LogStatus("Booking poll: suppressed (startup active)", false)
         return
+    }
+    if SystemState.isRecovering || SystemState.isRestarting {
+        LogStatus("Booking poll: suppressed (recovery/restart)", false)
+        return
+    }
 
+    LogStatus("Booking poll: fetching...", false)
     res := FetchBookingMessage(bookingUrl)
+    LogStatus("Booking poll: status=" . res.status . " body=" . SubStr(res.body, 1, 120), false)
     if (res.status = 200 && res.body != "") {
         if !InStr(res.body, '"type"')
-            LogStatus("Booking poll returned JSON without type field")
+            LogStatus("Booking poll: JSON missing type field")
         OverlayMgr.ShowBookingMessage(res.body)
     }
 }
@@ -1154,7 +1164,8 @@ FetchBookingMessage(url) {
         whr.Open("GET", url, false)
         whr.Send()
         return { status: whr.Status, body: whr.ResponseText }
-    } catch {
+    } catch as e {
+        LogStatus("Booking fetch error: " . e.Message, false)
         return { status: 0, body: "" }
     }
 }
