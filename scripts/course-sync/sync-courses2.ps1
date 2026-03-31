@@ -14,6 +14,27 @@ Write-Host "Bay: $($config._hostname) (Logical Bay $($config.logicalBay))" -Fore
 Write-Host "Remote: $remote" -ForegroundColor Cyan
 Write-Host "Local: $local" -ForegroundColor Cyan
 
+# --- Load course allow/exclude lists ---
+$excludedFile = Join-Path $repoRoot "config\excluded-courses.json"
+$extrasFile   = Join-Path $repoRoot "config\extra-courses.json"
+
+$excludedFolders = @()
+if (Test-Path $excludedFile) {
+    $excludedFolders = Get-Content $excludedFile -Raw | ConvertFrom-Json
+}
+$extraFolders = @()
+if (Test-Path $extrasFile) {
+    $extraFolders = Get-Content $extrasFile -Raw | ConvertFrom-Json
+}
+
+# Build lookup sets for fast membership testing
+$excludedSet = @{}
+foreach ($f in $excludedFolders) { $excludedSet[$f] = $true }
+$extraSet = @{}
+foreach ($f in $extraFolders) { $extraSet[$f] = $true }
+
+Write-Host "Excluded courses: $($excludedSet.Count), Extra (protected): $($extraSet.Count)" -ForegroundColor Cyan
+
 $timer = [System.Diagnostics.Stopwatch]::StartNew()
 
 # 1. Connection Check
@@ -23,20 +44,60 @@ if (!(Test-Path $remote)) {
     exit
 }
 
+# --- Build allowed folder set from remote ---
+# Allowed = (remote top-level folders NOT in excluded) + extras
+$remoteFolders = Get-ChildItem -Path $remote -Directory | Select-Object -ExpandProperty Name
+$allowedSet = @{}
+foreach ($f in $remoteFolders) {
+    if (-not $excludedSet.ContainsKey($f)) {
+        $allowedSet[$f] = $true
+    }
+}
+foreach ($f in $extraFolders) {
+    $allowedSet[$f] = $true
+}
+
+Write-Host "Remote folders: $($remoteFolders.Count), Allowed after exclusions: $($allowedSet.Count)" -ForegroundColor Cyan
+
+# --- Cleanup: remove local folders not in allowed set ---
+if (Test-Path $local) {
+    $localFolders = Get-ChildItem -Path $local -Directory | Select-Object -ExpandProperty Name
+    $removedCount = 0
+    foreach ($lf in $localFolders) {
+        if (-not $allowedSet.ContainsKey($lf)) {
+            $lfPath = Join-Path $local $lf
+            Write-Host "  Removing excluded/unknown course: $lf" -ForegroundColor Red
+            Remove-Item $lfPath -Recurse -Force -ErrorAction SilentlyContinue
+            $removedCount++
+        }
+    }
+    if ($removedCount -gt 0) {
+        Write-Host "Removed $removedCount course folder(s)." -ForegroundColor Yellow
+    } else {
+        Write-Host "No course folders to remove." -ForegroundColor Green
+    }
+}
+
 # 2. Preparation
 if (Test-Path $staging) { Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue }
 New-Item -ItemType Directory -Path $staging -Force | Out-Null
 
 Write-Host "--- Phase 1: Analyzing Differences ---" -ForegroundColor Cyan
 
-# 3. Cataloging Remote Files
-$remoteFiles = Get-ChildItem -Path $remote -Recurse | Where-Object { !$_.PSIsContainer }
+# 3. Cataloging Remote Files (only allowed folders)
+$remoteFiles = Get-ChildItem -Path $remote -Recurse | Where-Object {
+    if ($_.PSIsContainer) { return $false }
+    # Get the top-level folder name from the relative path
+    $rel = $_.FullName.Replace($remote, "").TrimStart("\")
+    $topFolder = $rel.Split("\")[0]
+    return $allowedSet.ContainsKey($topFolder)
+}
 $filesToSync = New-Object System.Collections.Generic.List[PSObject]
 
 foreach ($rFile in $remoteFiles) {
     $relative = $rFile.FullName.Replace($remote, "").TrimStart("\")
     $lFile = Join-Path $local $relative
-    
+
     if (!(Test-Path $lFile) -or (Get-Item $lFile).LastWriteTime -lt $rFile.LastWriteTime -or (Get-Item $lFile).Length -ne $rFile.Length) {
         $filesToSync.Add($rFile)
     }
