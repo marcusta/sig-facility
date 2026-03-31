@@ -44,23 +44,44 @@ if (!(Test-Path $remote)) {
     exit
 }
 
-# --- Build allowed folder set from remote ---
-# Allowed = (remote top-level folders NOT in excluded) + extras
-$remoteFolders = Get-ChildItem -Path $remote -Directory | Select-Object -ExpandProperty Name
+# --- Fetch course manifest (source of truth for valid courses) ---
+$manifestUrl = "https://simulatorgolftour.com/course_manifest.json"
+Write-Host "Fetching course manifest..." -ForegroundColor Cyan
+try {
+    $manifestJson = (New-Object System.Net.WebClient).DownloadString($manifestUrl)
+    $manifest = $manifestJson | ConvertFrom-Json
+    $manifestFolders = @{}
+    foreach ($course in $manifest) {
+        if ($course.CourseFolder) {
+            $manifestFolders[$course.CourseFolder] = $true
+        }
+    }
+    Write-Host "Manifest: $($manifestFolders.Count) courses" -ForegroundColor Cyan
+} catch {
+    Write-Warning "Could not fetch manifest: $_"
+    Write-Warning "Skipping cleanup phase - will only sync from remote share."
+    $manifestFolders = $null
+}
+
+# --- Build allowed folder set from manifest ---
+# Allowed = (manifest CourseFolder values NOT in excluded) + extras
 $allowedSet = @{}
-foreach ($f in $remoteFolders) {
-    if (-not $excludedSet.ContainsKey($f)) {
-        $allowedSet[$f] = $true
+if ($manifestFolders) {
+    foreach ($f in $manifestFolders.Keys) {
+        if (-not $excludedSet.ContainsKey($f)) {
+            $allowedSet[$f] = $true
+        }
     }
 }
 foreach ($f in $extraFolders) {
     $allowedSet[$f] = $true
 }
 
-Write-Host "Remote folders: $($remoteFolders.Count), Allowed after exclusions: $($allowedSet.Count)" -ForegroundColor Cyan
+Write-Host "Allowed after exclusions: $($allowedSet.Count)" -ForegroundColor Cyan
 
 # --- Cleanup: remove local folders not in allowed set ---
-if (Test-Path $local) {
+# Only run cleanup when manifest was fetched successfully (otherwise we don't know what's valid)
+if ($manifestFolders -and (Test-Path $local)) {
     $localFolders = Get-ChildItem -Path $local -Directory | Select-Object -ExpandProperty Name
     $removedCount = 0
     foreach ($lf in $localFolders) {
@@ -84,9 +105,10 @@ New-Item -ItemType Directory -Path $staging -Force | Out-Null
 
 Write-Host "--- Phase 1: Analyzing Differences ---" -ForegroundColor Cyan
 
-# 3. Cataloging Remote Files (only allowed folders)
+# 3. Cataloging Remote Files (only allowed folders when manifest is available)
 $remoteFiles = Get-ChildItem -Path $remote -Recurse | Where-Object {
     if ($_.PSIsContainer) { return $false }
+    if (-not $manifestFolders) { return $true }
     # Get the top-level folder name from the relative path
     $rel = $_.FullName.Replace($remote, "").TrimStart("\")
     $topFolder = $rel.Split("\")[0]
@@ -147,6 +169,9 @@ foreach ($folder in $folders) {
         $destFile = Join-Path $currentLocalDir $file.Name
         Move-Item -Path $file.FullName -Destination $destFile -Force
     }
+
+    # Remove staging folder for this course immediately after move
+    Remove-Item $currentStagingDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 # Cleanup Progress Bars
