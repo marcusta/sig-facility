@@ -126,6 +126,9 @@ global bookingUrl := ""
 global relayEnabled := !FileExist("C:\SimGolf\no-relay")
 global relayPort := 0
 global relayPortName := ""
+global relayLastError := ""
+global RELAY_RETRY_MS := 60000
+global RELAY_STATUS_FILE := "C:\SimGolf\relay-status.json"
 
 ; ##################################################################
 ; DEBUG OVERLAY
@@ -250,10 +253,14 @@ UpdateDebugOverlayState() {
 ; ##################################################################
 
 LogStatus("Starting System v2 (Timer-based)...")
-if (relayEnabled)
-    InitializeRelay()
-else
+if (relayEnabled) {
+    if !InitializeRelay()
+        StartRelayRetry()
+} else {
     LogStatus("Relay disabled (no-relay flag)")
+    relayLastError := "disabled"
+}
+WriteRelayStatus()
 
 ; Read bay identity and create overlay manager
 global OverlayMgr := ""
@@ -1101,7 +1108,8 @@ CleanupAndExit() {
     if OverlayMgr
         OverlayMgr.Cleanup()
 
-    if (relayEnabled) {
+    SetTimer(RelayRetryTick, 0)
+    if (relayEnabled && relayPort != 0) {
         SetRelayRed()
         Sleep(100)
         CloseSerialPort(relayPort)
@@ -1187,10 +1195,11 @@ ReadMatchiCourtId(identityPath, baysPath) {
 ; USB RELAY FUNCTIONS
 ; ##################################################################
 
-InitializeRelay() {
-    global relayPort, relayPortName
+InitializeRelay(quiet := false) {
+    global relayPort, relayPortName, relayLastError
 
-    LogStatus("Detecting USB relay via WMI...")
+    if !quiet
+        LogStatus("Detecting USB relay via WMI...")
 
     ; Query WMI for COM port devices
     allPorts := []
@@ -1218,49 +1227,114 @@ InitializeRelay() {
         }
 
         ; Log all found COM ports
-        if (allPorts.Length = 0) {
-            LogStatus("WMI: No COM ports found")
-        } else {
-            LogStatus("WMI: Found " . allPorts.Length . " COM port(s)")
-            for device in allPorts {
-                LogStatus("  " . device.port . ": " . device.name)
+        if !quiet {
+            if (allPorts.Length = 0) {
+                LogStatus("WMI: No COM ports found")
+            } else {
+                LogStatus("WMI: Found " . allPorts.Length . " COM port(s)")
+                for device in allPorts {
+                    LogStatus("  " . device.port . ": " . device.name)
+                }
             }
         }
 
     } catch as e {
-        LogStatus("WMI query failed: " . e.Message)
+        relayLastError := "WMI query failed: " . e.Message
+        if !quiet
+            LogStatus(relayLastError)
         return false
     }
 
     if (cp210xPorts.Length = 0) {
-        LogStatus("No CP210x devices in list!")
+        relayLastError := "No CP210x device found"
+        if !quiet
+            LogStatus("No CP210x devices in list!")
         return false
     }
 
-    LogStatus("Found " . cp210xPorts.Length . " CP210x device(s)")
+    if !quiet
+        LogStatus("Found " . cp210xPorts.Length . " CP210x device(s)")
 
     ; Try to open each CP210x port
     for device in cp210xPorts {
-        LogStatus("Trying " . device.port . "...")
+        if !quiet
+            LogStatus("Trying " . device.port . "...")
         handle := OpenSerialPort(device.port)
         if (handle = -1) {
-            LogStatus("  Failed to open port")
+            relayLastError := "Failed to open " . device.port
+            if !quiet
+                LogStatus("  Failed to open port")
             continue
         }
 
         if SendRelayCommand(handle, "AT+CH1=0") {
             relayPort := handle
             relayPortName := device.port
+            relayLastError := ""
             LogStatus("Relay connected on " . device.port)
             return true
         } else {
-            LogStatus("  Failed to send command")
+            relayLastError := "Write failed on " . device.port
+            if !quiet
+                LogStatus("  Failed to send command")
             CloseSerialPort(handle)
         }
     }
 
-    LogStatus("Failed to connect to CP210x relay!")
+    if !quiet
+        LogStatus("Failed to connect to CP210x relay!")
     return false
+}
+
+; Periodic reconnect while the relay is missing. Logs only on state change.
+StartRelayRetry() {
+    global RELAY_RETRY_MS
+    LogStatus("Relay missing - retrying every " . (RELAY_RETRY_MS // 1000) . "s")
+    SetTimer(RelayRetryTick, RELAY_RETRY_MS)
+}
+
+RelayRetryTick() {
+    global relayPort, lastRelayState
+    if (relayPort != 0) {
+        SetTimer(RelayRetryTick, 0)
+        return
+    }
+    if InitializeRelay(true) {
+        SetTimer(RelayRetryTick, 0)
+        lastRelayState := -1
+        WriteRelayStatus()
+    }
+}
+
+; Called when a write to an open port fails: drop the handle and start retrying.
+HandleRelayLost(reason) {
+    global relayPort, relayPortName, relayLastError, lastRelayState
+    LogStatus("Relay lost on " . relayPortName . " (" . reason . ")")
+    CloseSerialPort(relayPort)
+    relayPort := 0
+    relayPortName := ""
+    relayLastError := reason
+    lastRelayState := -1
+    WriteRelayStatus()
+    StartRelayRetry()
+}
+
+; Status file read by scripts/monitoring/check-status.ps1 and sent to the API.
+WriteRelayStatus() {
+    global relayEnabled, relayPort, relayPortName, relayLastError, RELAY_STATUS_FILE
+    connected := (relayEnabled && relayPort != 0) ? "true" : "false"
+    json := "{"
+        . '"enabled":' . (relayEnabled ? "true" : "false")
+        . ',"connected":' . connected
+        . ',"port":"' . relayPortName . '"'
+        . ',"error":"' . StrReplace(relayLastError, '"', "'") . '"'
+        . ',"updatedAt":"' . FormatTime(A_NowUTC, "yyyy-MM-dd'T'HH:mm:ss'Z'") . '"'
+        . "}"
+    try {
+        if FileExist(RELAY_STATUS_FILE)
+            FileDelete(RELAY_STATUS_FILE)
+        FileAppend(json, RELAY_STATUS_FILE)
+    }
 }
 
 OpenSerialPort(portName) {
@@ -1339,14 +1413,16 @@ SetRelayGreen() {
     global relayPort, lastRelayState, relayEnabled
     if (!relayEnabled)
         return true
+    if (relayPort = 0)
+        return false  ; not connected; RelayRetryTick handles reconnect
     if (lastRelayState = 0)
         return true
-    LogStatus("Relay -> GREEN (port:" . relayPort . ")", false)
+    LogStatus("Relay -> GREEN (" . relayPortName . ")", false)
     if SendRelayCommand(relayPort, "AT+CH1=1") {
         lastRelayState := 0
         return true
     }
-    LogStatus("Relay GREEN failed!")
+    HandleRelayLost("GREEN write failed")
     return false
 }
 
@@ -1354,13 +1430,15 @@ SetRelayRed() {
     global relayPort, lastRelayState, relayEnabled
     if (!relayEnabled)
         return true
+    if (relayPort = 0)
+        return false  ; not connected; RelayRetryTick handles reconnect
     if (lastRelayState = 1)
         return true
-    LogStatus("Relay -> RED (port:" . relayPort . ")", false)
+    LogStatus("Relay -> RED (" . relayPortName . ")", false)
     if SendRelayCommand(relayPort, "AT+CH1=0") {
         lastRelayState := 1
         return true
     }
-    LogStatus("Relay RED failed!")
+    HandleRelayLost("RED write failed")
     return false
 }

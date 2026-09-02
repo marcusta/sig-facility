@@ -2,10 +2,11 @@
 
 <#
 .SYNOPSIS
-    Bay status monitoring - reports disk space to central API
+    Bay status monitoring - reports disk space and relay status to central API
 
 .DESCRIPTION
-    Continuously monitors disk space on all fixed drives and sends status
+    Continuously monitors disk space on all fixed drives and the USB relay
+    (indicator lamp) status written by gspro-start-v2.ahk, and sends status
     updates to the central API endpoint. Runs as a background process
     managed by the supervisor.
 
@@ -33,6 +34,19 @@ if (-not (Test-Path $logPath)) {
 }
 
 $errorLogFile = Join-Path $logPath "monitor_error.log"
+$relayStatusFile = "C:\SimGolf\relay-status.json"
+
+# Read relay status written by gspro-start-v2.ahk. Returns $null if unavailable.
+function Get-RelayStatus {
+    if (-not (Test-Path $relayStatusFile)) { return $null }
+    try {
+        $raw = Get-Content -Path $relayStatusFile -Raw -ErrorAction Stop
+        return $raw | ConvertFrom-Json
+    } catch {
+        Write-Log "Could not read relay status: $_" -Level "WARN"
+        return $null
+    }
+}
 
 # Logging function
 function Write-Log {
@@ -68,12 +82,28 @@ while ($true) {
             $status.dDriveSpace = $dFree
         }
 
+        # Relay (indicator lamp) status
+        $relay = Get-RelayStatus
+        if ($null -ne $relay) {
+            $status.relayEnabled = [bool]$relay.enabled
+            $status.relayConnected = [bool]$relay.connected
+            $status.relayPort = [string]$relay.port
+            $status.relayError = [string]$relay.error
+            $status.relayUpdatedAt = [string]$relay.updatedAt
+        }
+
         # Send to API
         $json = $status | ConvertTo-Json
         $response = Invoke-RestMethod -Uri $serverUrl -Method Post -Body $json -ContentType "application/json" -TimeoutSec 10
 
         $logMsg = "C=$($cFree)GB"
         if ($null -ne $dFree) { $logMsg += ", D=$($dFree)GB" }
+        if ($null -ne $relay) {
+            $relayMsg = if (-not $relay.enabled) { "disabled" } elseif ($relay.connected) { "connected on $($relay.port)" } else { "MISSING ($($relay.error))" }
+            $logMsg += ", relay=$relayMsg"
+        } else {
+            $logMsg += ", relay=unknown"
+        }
         Write-Log "Status sent: $logMsg" -Level "INFO"
 
     } catch {
