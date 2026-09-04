@@ -7,7 +7,7 @@ SimGolf Facility Management System for **Sweden Indoor Golf** — manages 8 unma
 ## Architecture
 
 **Two-layer deployment:**
-1. **Supervisor** (`C:\SimGolf\supervisor.ps1`) — lives outside the repo, auto-pulls every 30 min, restarts processes on changes
+1. **Supervisor** (`C:\SimGolf\supervisor.ps1`) — lives outside the repo, auto-pulls every 30 min, restarts the background scripts (`check-status.ps1`, `shot-watcher.ps1`) on changes and on its own start. Each script has its own restart signal file (`C:\SimGolf\restart-requested`, `C:\SimGolf\restart-requested-shot-watcher`).
 2. **Repository** (`C:\SimGolf\sig-facility\`) — all scripts, configs, business logic; auto-updated via git
 
 **Configuration** merges `config/shared.json` (base) with `config/bays.json` (per-hostname overrides) via `lib/Config.ps1`. Bay identity is resolved from `C:\SimGolf\bay-identity.json` (contains `{"bayId": "BAY01"}`). The `bays.json` entry for each bay includes `logicalBay` (integer 1-8) which is the physical bay number.
@@ -33,6 +33,7 @@ lib/
 install/         One-time installer, supervisor template, .NET runtime installer
 scripts/
   monitoring/    Disk space reporting to API
+  shot-watcher/  Forwards GSPro shots (currentRound.dat) to sig-gsp-data
   course-sync/   Network share sync with staging
   gspro-automation/  GSPro control scripts (AHK v1 & v2)
   gspro-settings/    Settings backup/restore
@@ -53,6 +54,8 @@ scripts/
 - Automatic recovery: reconnects lost LM connections, restarts crashed connector
 - Addon & overlay window repair: detects missing "Advanced Connect Add On" and OnTopReplica windows
 - USB relay control (CP210x) for physical indicator lamp with blink patterns
+  - If the relay is missing at startup or a write fails, the script retries `InitializeRelay()` every 60s and stays quiet in between
+  - Writes `C:\SimGolf\relay-status.json` (`enabled`, `connected`, `port`, `error`, `updatedAt`); `scripts/monitoring/check-status.ps1` sends these as `relay*` fields to the status API
 - Debug overlay GUI (auto-collapse when stable)
 - Window hierarchy management (game fullscreen, overlay always-on-top, connector behind)
 
@@ -100,6 +103,16 @@ WebView2-based HTML overlay for displaying content on top of GSPro.
 
 **Related project:** `sig-web/` (gitignored) is a local copy of the Next.js website for reference only. It is NOT part of this project and is not deployed to bays. Never reference files from `sig-web/` in overlay HTML or scripts -- all assets must live within the repo (under `scripts/overlay/pages/images/` or similar).
 
+## Shot Watcher
+
+`scripts/shot-watcher/shot-watcher.ps1` polls GSPro's `currentRound.dat` (JSON array, whole file rewritten after each shot, about 24 KB per shot) and posts new shots to the `sig-gsp-data` service (`~/dev/github/sig-gsp-data`, deployed at `https://app.swedenindoorgolf.se/sig-gsp-data/`).
+
+- Config keys in `shared.json`: `shotWatcherEnabled`, `shotWatcherUrl`, `shotWatcherIntervalSeconds`, `shotDataPath` (empty = auto-detect `%USERPROFILE%\AppData\LocalLow\GSPro\currentRound.dat`, falling back to a search under LocalLow), `shotWatcherApiKeyFile`.
+- The API key lives outside the repo in `C:\SimGolf\shot-api-key.txt` (same value as `INGEST_API_KEY` on the server). Never commit it.
+- State in `C:\SimGolf\shot-watcher-state.json`: session id, first ShotID, sent ShotIDs. A new session starts when the file's first ShotID changes.
+- Logs to `C:\SimGolf\logs\shot-watcher-<date>.log`.
+- PowerShell 5's `ConvertFrom-Json` fails above 2 MB, so the watcher uses `JavaScriptSerializer` with `MaxJsonLength` raised.
+
 ## External Dependencies
 
 - GSPro golf simulator (`C:\GSProV1\`)
@@ -107,6 +120,7 @@ WebView2-based HTML overlay for displaying content on top of GSPro.
 - .NET 8 Runtime (for gs-checker.exe)
 - Network share `\\SIGBAY1\sig\gspro-prefetcher\sgt` (course files)
 - API: `https://app.swedenindoorgolf.se/sig-status/status`
+- Shot ingest API: `https://app.swedenindoorgolf.se/sig-gsp-data/api/ingest/shots`
 
 ## Development Notes
 

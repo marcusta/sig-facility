@@ -6,5 +6,11 @@
   "courseSyncStagingPath": "C:\\course_staging",
 
   "statusMonitorUrl": "https://app.swedenindoorgolf.se/sig-status/status",
-  "statusMonitorIntervalSeconds": 600
+  "statusMonitorIntervalSeconds": 600,
+
+  "shotWatcherEnabled": true,
+  "shotWatcherUrl": "https://app.swedenindoorgolf.se/sig-gsp-data/api/ingest/shots",
+  "shotWatcherIntervalSeconds": 5,
+  "shotDataPath": "",
+  "shotWatcherApiKeyFile": "C:\\SimGolf\\shot-api-key.txt"
 }

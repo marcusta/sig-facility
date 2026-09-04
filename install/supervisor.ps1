@@ -9,7 +9,7 @@
     It runs continuously and:
     - Pulls updates from git every 30 minutes
     - Tracks commit hash changes
-    - Restarts background processes when code changes
+    - Restarts background processes (check-status, shot-watcher) when code changes
     - Handles initial repo clone if needed
 
 .NOTES
@@ -20,8 +20,12 @@
 # Configuration
 $RepoPath = "C:\SimGolf\sig-facility"
 $RepoUrl = "https://github.com/marcusta/sig-facility.git"
-$BackgroundScriptPath = "$RepoPath\scripts\monitoring\check-status.ps1"
-$RestartSignalFile = "C:\SimGolf\restart-requested"
+# Background scripts managed by this supervisor. Each one exits when its
+# Signal file appears (and deletes it), so restarts are graceful per script.
+$BackgroundScripts = @(
+    @{ Name = "check-status";  Path = "$RepoPath\scripts\monitoring\check-status.ps1";   Signal = "C:\SimGolf\restart-requested" },
+    @{ Name = "shot-watcher";  Path = "$RepoPath\scripts\shot-watcher\shot-watcher.ps1"; Signal = "C:\SimGolf\restart-requested-shot-watcher" }
+)
 $SupervisorRepoPath = "$RepoPath\install\supervisor.ps1"
 $SupervisorRunningPath = "C:\SimGolf\supervisor.ps1"
 $CheckIntervalSeconds = 1800  # 30 minutes
@@ -124,67 +128,83 @@ function Update-Repository {
     }
 }
 
-# Check if background process is running
-function Test-BackgroundProcessRunning {
-    # Look for PowerShell process running our background script
-    $processes = Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%check-status.ps1%'"
-    return ($null -ne $processes)
+# Processes running a given background script (matched on the script file name)
+function Get-BackgroundProcesses {
+    param($Script)
+    $fileName = Split-Path $Script.Path -Leaf
+    return @(Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%$fileName%'")
 }
 
-# Start the background process
-function Start-BackgroundProcess {
-    param([string]$ScriptPath)
+function Test-BackgroundProcessRunning {
+    param($Script)
+    return ((Get-BackgroundProcesses -Script $Script).Count -gt 0)
+}
 
-    if (-not (Test-Path $ScriptPath)) {
-        Write-Log "Background script not found at $ScriptPath" -Level "WARN"
+# Start one background script hidden
+function Start-BackgroundProcess {
+    param($Script)
+
+    if (-not (Test-Path $Script.Path)) {
+        Write-Log "Background script not found at $($Script.Path)" -Level "WARN"
         return $false
     }
 
-    Write-Log "Starting background process: $ScriptPath" -Level "INFO"
+    Write-Log "Starting background process: $($Script.Name)" -Level "INFO"
 
     try {
-        # Start the background script in a new window (for debugging) or hidden
         # Change -WindowStyle to 'Normal' for debugging, 'Hidden' for production
         Start-Process -FilePath "powershell.exe" `
-                      -ArgumentList "-ExecutionPolicy", "Bypass", "-File", "`"$ScriptPath`"" `
+                      -ArgumentList "-ExecutionPolicy", "Bypass", "-File", "`"$($Script.Path)`"" `
                       -WindowStyle Hidden
 
-        Write-Log "Background process started" -Level "INFO"
+        Write-Log "Background process started: $($Script.Name)" -Level "INFO"
         return $true
     } catch {
-        Write-Log "Failed to start background process: $_" -Level "ERROR"
+        Write-Log "Failed to start background process $($Script.Name): $_" -Level "ERROR"
         return $false
     }
 }
 
-# Request graceful restart of background process
+# Request graceful restart of one background script, force kill after 30 s
 function Request-BackgroundRestart {
-    Write-Log "Requesting graceful restart of background process" -Level "INFO"
+    param($Script)
 
-    # Create restart signal file
-    Set-Content -Path $RestartSignalFile -Value (Get-Date) -Force
+    if (-not (Test-BackgroundProcessRunning -Script $Script)) {
+        return $true
+    }
 
-    # Wait up to 30 seconds for process to exit gracefully
+    Write-Log "Requesting graceful stop of $($Script.Name)" -Level "INFO"
+    Set-Content -Path $Script.Signal -Value (Get-Date) -Force
+
     $timeout = 30
     $waited = 0
-
     while ($waited -lt $timeout) {
-        if (-not (Test-BackgroundProcessRunning)) {
-            Write-Log "Background process stopped gracefully" -Level "INFO"
+        if (-not (Test-BackgroundProcessRunning -Script $Script)) {
+            Write-Log "$($Script.Name) stopped gracefully" -Level "INFO"
+            Remove-Item $Script.Signal -ErrorAction SilentlyContinue
             return $true
         }
-
         Start-Sleep -Seconds 2
         $waited += 2
     }
 
-    # If still running after timeout, force kill
-    Write-Log "Background process did not stop gracefully, force killing" -Level "WARN"
-    Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%check-status.ps1%'" |
-        ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
-
+    Write-Log "$($Script.Name) did not stop gracefully, force killing" -Level "WARN"
+    Get-BackgroundProcesses -Script $Script |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Remove-Item $Script.Signal -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2
     return $true
+}
+
+# Restart every background script (used after code changes and on supervisor start)
+function Restart-AllBackgroundProcesses {
+    foreach ($script in $BackgroundScripts) {
+        Request-BackgroundRestart -Script $script | Out-Null
+    }
+    Start-Sleep -Seconds 3
+    foreach ($script in $BackgroundScripts) {
+        Start-BackgroundProcess -Script $script | Out-Null
+    }
 }
 
 # Self-update: replace running supervisor if repo version differs, then restart
@@ -214,6 +234,10 @@ function Start-Supervisor {
     Write-Log "Computer: $env:COMPUTERNAME" -Level "INFO"
     Write-Log "Check interval: $CheckIntervalSeconds seconds" -Level "INFO"
 
+    # A supervisor start means boot or self-update; either way the background
+    # scripts should run the code that is in the repo now.
+    Restart-AllBackgroundProcesses
+
     while ($true) {
         try {
             Write-Log "Running update check..." -Level "INFO"
@@ -221,24 +245,23 @@ function Start-Supervisor {
             # Pull updates and check if anything changed
             $changesDetected = Update-Repository -Path $RepoPath -Url $RepoUrl
 
-            # Self-update supervisor if repo version changed (exits if updated)
+            # Self-update supervisor if repo version changed (exits if updated;
+            # the new instance restarts the background scripts on start)
             if ($changesDetected) {
                 Update-Supervisor
             }
 
-            # Restart if changes detected OR background process not running
-            $isRunning = Test-BackgroundProcessRunning
-
             if ($changesDetected) {
-                Write-Log "Changes detected, restarting background process" -Level "INFO"
-                Request-BackgroundRestart
-                Start-Sleep -Seconds 3
-                Start-BackgroundProcess -ScriptPath $BackgroundScriptPath
-            } elseif (-not $isRunning) {
-                Write-Log "Background process not running, starting it" -Level "INFO"
-                Start-BackgroundProcess -ScriptPath $BackgroundScriptPath
+                Write-Log "Changes detected, restarting background processes" -Level "INFO"
+                Restart-AllBackgroundProcesses
             } else {
-                Write-Log "No changes detected, background process running normally" -Level "INFO"
+                foreach ($script in $BackgroundScripts) {
+                    if (-not (Test-BackgroundProcessRunning -Script $script)) {
+                        Write-Log "$($script.Name) not running, starting it" -Level "INFO"
+                        Start-BackgroundProcess -Script $script | Out-Null
+                    }
+                }
+                Write-Log "No changes detected" -Level "INFO"
             }
 
             Write-Log "Next check in $CheckIntervalSeconds seconds" -Level "INFO"
