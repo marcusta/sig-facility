@@ -346,13 +346,19 @@ CheckStartupComplete() {
     SetTimer(WaitForGsproReady, 500)
 }
 
-; Pixel on GSPro logo text - white (FFFFFF) when main menu is loaded
-global GSPRO_READY_X := 1098
-global GSPRO_READY_Y := 58
-global GSPRO_READY_COLOR := 0xFFFFFF  ; BGR white
+; GSPro v4 top-left background at window coordinates (20, 20).
+; Loading: RGB 0D141E (BGR 1E140D). Menu: RGB 0D1622 (BGR 22160D).
+; Match exactly because the loading and menu colors are close.
+global GSPRO_READY_X := 20
+global GSPRO_READY_Y := 20
+global GSPRO_READY_COLOR := 0x22160D
+global GSPRO_READY_SAMPLES := 3
 
 WaitForGsproReady() {
+    static readyCount := 0
+
     if !WinExist(GAME_WINDOW) {
+        readyCount := 0
         SetTimer(WaitForGsproReady, 0)
         return
     }
@@ -360,7 +366,9 @@ WaitForGsproReady() {
     hwnd := WinExist(GAME_WINDOW)
     color := GetPixelColorHidden(hwnd, GSPRO_READY_X, GSPRO_READY_Y)
 
-    if (color = GSPRO_READY_COLOR) {
+    readyCount := (color = GSPRO_READY_COLOR) ? readyCount + 1 : 0
+    if (readyCount >= GSPRO_READY_SAMPLES) {
+        readyCount := 0
         SetTimer(WaitForGsproReady, 0)
         LogStatus("GSPro menu detected - ready!")
         if OverlayMgr

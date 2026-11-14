@@ -109,6 +109,8 @@ Windows login
 6. Arranges the window hierarchy (game fullscreen, connector behind, overlay on top)
 7. Enters the main timer loop
 
+The startup overlay is hidden once the GSPro v4 menu background at window coordinates `(20, 20)` matches RGB `#0D1622` (BGR `0x22160D`) for three consecutive 500 ms samples. The loading background is RGB `#0D141E`, so the comparison uses an exact color match.
+
 **Timer loop (runs indefinitely):**
 
 | Timer | Interval | Purpose |
