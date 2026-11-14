@@ -6,7 +6,8 @@
 ; CONFIGURATION
 ; ##################################################################
 
-global GSP_PATH      := "C:\GSProV1\Core\GSP\GSPro.exe"
+; Use the launcher during the major-version rollout to pick up updates.
+global GSP_PATH      := "C:\GSProV1\GSPLauncher.exe"
 global SETTINGS_BAT  := "C:\SimGolf\sig-facility\scripts\gspro-settings\copy_gspro_settings.bat"
 global OVERLAY_BAT   := "C:\SimGolf\sig-facility\scripts\gspro-automation\start-overlay.bat"
 
@@ -306,6 +307,9 @@ InitializeSystem() {
     } else {
         RunWait(SETTINGS_BAT, , "Hide")
         Run(GSP_PATH)
+        ; Updates can take longer than the connector timeout.
+        LogStatus("Waiting for GSPro (launcher may be updating)...")
+        WinWait(GAME_WINDOW)
     }
 
     if WinExist(CONNECTOR_WINDOW) {

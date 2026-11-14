@@ -103,7 +103,7 @@ Windows login
 
 1. Detects and connects to the USB relay (CP210x serial device) for the physical indicator lamp
 2. Restores GSPro settings from `.orig` backups
-3. Launches `GSPro.exe` and waits for the connector window
+3. Launches `C:\GSProV1\GSPLauncher.exe` to pick up GSPro updates, waits for the game window without a timeout, then waits for the connector window
 4. Clicks "Open Visual Data" to open the stats addon window
 5. Starts `OnTopReplica` to mirror the addon as an always-on-top overlay
 6. Arranges the window hierarchy (game fullscreen, connector behind, overlay on top)
