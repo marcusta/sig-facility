@@ -1,5 +1,8 @@
-﻿WinActivate, GSPro
-MouseMove, 545, 345
+﻿CoordMode, Mouse, Screen
+WinActivate, ahk_exe GSPro.exe
+WinWaitActive, ahk_exe GSPro.exe
+; GSPro v4 Player Name field (fullscreen screen coordinates).
+MouseMove, 1513, 354
 Click
 Send ^a
 Send ^c
@@ -13,7 +16,8 @@ whr.Send()
 whr.WaitForResponse()
 value := whr.ResponseText
 
-MouseMove, 545, 500
+; GSPro v4 SGT UID field (fullscreen screen coordinates).
+MouseMove, 1508, 464
 Click
 Send ^a
 Send, %value% 

@@ -103,9 +103,10 @@ AutoHotkey scripts for automated GSPro startup and window management:
 - Essential if you have connection stability issues
 
 **gspro-user.ahk**
-- In-game user interface automation
-- Used during gameplay for various user interactions
-- Details: TBD (document specific functionality)
+- AutoHotkey v1 script that reads Player Name, looks up the player's SGT UID, and fills it into GSPro
+- Uses fullscreen screen coordinates for GSPro v4: Player Name `(1513, 354)`, SGT UID `(1508, 464)`
+- Activates GSPro and waits for focus before clicking
+- If the SGT shortcut runs a compiled `sgt.exe`, that executable must also be rebuilt/replaced for source changes to take effect
 
 **open-data.ahk**
 - Opens data folder for quick access/debugging
